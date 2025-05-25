@@ -129,3 +129,4 @@ yarn.lock
 .pnpm-debug.log
 test-results/
 *.tsbuildinfo
+.qodo
