@@ -2,6 +2,8 @@
 
 **LF Hub** is a campus-oriented web application built with Next.js, React, and Supabase. It enables students and staff to report items they’ve found on campus, allowing rightful owners to browse listings and reclaim their lost belongings. LF Hub aims to foster a responsible and honest school community.
 
+> **This project was created by a group of 4 students from section BSCS 1-2 (A.Y. 2024-2025) to fulfill our final requirement in Web Systems and Technologies (ITEC50B), under Mr. Rey Anthony De Luna.**
+
 ---
 
 ## 📄 Legal & Policy Documents
@@ -88,9 +90,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Developed by students of **Cavite State University – BS Computer Science**:
 
-- **Zean Kurt G. Balboa** – [https://github.com/xKurty06](https://github.com/xKurty06)
+- **Zean Kurt G. Balboa** – [Github](https://github.com/xKurty06)
 - **Mark Andrei Dela Paz** – [GitHub](https://github.com/)
-- **[Ray Ardee Gaano** – [GitHub](https://github.com/)
+- **Ray Ardee Gaano** – [GitHub](https://github.com/)
 - **Raphael Reyes** – [GitHub](https://github.com/)
 
 ---
