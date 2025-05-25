@@ -9,7 +9,6 @@ export default function Page() {
     const [showClickMe, setShowClickMe] = useState(false);
     const aboutRef = useRef<HTMLDivElement>(null);
     const [aboutVisible, setAboutVisible] = useState(false);
-    const [aboutAnimKey, setAboutAnimKey] = useState(0);
 
     // Shared function to center the getStarted section
     function scrollToGetStarted() {
@@ -111,9 +110,6 @@ export default function Page() {
             ([entry]) => {
                 if (entry.isIntersecting) {
                     setAboutVisible(true);
-                    setAboutAnimKey(prev => prev + 1); // restart animation
-                } else {
-                    setAboutVisible(false);
                 }
             },
             { threshold: 0.3 }
@@ -176,7 +172,7 @@ export default function Page() {
                             const viewportHeight = window.innerHeight;
                             const sectionHeight = rect.height;
                             // Center the section: align its center with the viewport center below the navbar
-                            let offset = scrollTop + rect.top + sectionHeight / 1.2 - viewportHeight / 2 - navHeight / 2;
+                            let offset = scrollTop + rect.top + sectionHeight / 1.45 - viewportHeight / 2 - navHeight / 2;
                             // Clamp offset
                             const maxScroll = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
                             if (offset > maxScroll) offset = maxScroll;
@@ -229,7 +225,6 @@ export default function Page() {
             <section id="about" className="w-full mt-36 mb-20">
                 <div
                     ref={aboutRef}
-                    key={aboutAnimKey}
                     className={`max-w-6xl mx-auto px-8 transition-all duration-700 ${aboutVisible ? "animate-fadein-up animate-about-glow" : "opacity-0 translate-y-10"}`}
                 >
                     <div className="flex items-center gap-3 mb-4">
