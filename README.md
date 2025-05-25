@@ -4,6 +4,15 @@
 
 ---
 
+## 📄 Legal & Policy Documents
+
+- [Terms of Service](./src/legal/terms-of-service.md)
+- [Privacy Policy](./src/legal/privacy-policy.md)
+- [Accessibility Statement](./src/legal/accessibility-statement.md)
+- [Website Terms](./src/legal/website-terms.md)
+
+---
+
 ## 📌 Features
 
 - 📷 **Submit Found Items** – Upload details and photos of found items.

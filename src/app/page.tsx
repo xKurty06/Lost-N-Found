@@ -193,7 +193,7 @@ export default function Page() {
             <section id="getStarted" className="w-full" style={{ background: '#006f3d' }}>
                 <div ref={getStartedRef} className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-12 px-4 py-24 relative">
                     {/* LOST ITEM */}
-                    <div className="flex flex-col items-center w-full md:w-1/2 max-w-md">
+                    <Link href="/lost-item" className="flex flex-col items-center w-full md:w-1/2 max-w-md">
                         <button className={`flex items-center bg-[#003e22] bg-opacity-90 rounded-xl px-10 py-6 shadow-lg transition hover:bg-green-800 group w-full justify-center transform hover:scale-105 duration-200 relative ${showClickMe ? 'ring-4 ring-yellow-400 animate-bounce' : ''}`}>
                             <span className="text-4xl md:text-5xl font-extrabold text-gray-100 tracking-wide font-[cursive]">LOST ITEM</span>
                             <img src="/icons/lostitem-icon.svg" alt="Lost Icon" className="w-14 h-14 ml-4" />
@@ -204,7 +204,7 @@ export default function Page() {
                         <span className="text-white text-base md:text-lg font-medium text-center mt-4">
                             Find &amp; Browse items, post details of lost items,<br />including descriptions, locations, and images.
                         </span>
-                    </div>
+                    </Link>
                     {/* FOUND */}
                     <div className="flex flex-col items-center w-full md:w-1/2 max-w-md">
                         <button className={`flex items-center bg-[#003e22] bg-opacity-90 rounded-xl px-13 py-6 shadow-lg transition hover:bg-green-800 group w-full justify-center transform hover:scale-105 duration-200 relative ${showClickMe ? 'ring-4 ring-yellow-400 animate-bounce' : ''}`}>
