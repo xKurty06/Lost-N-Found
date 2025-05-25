@@ -19,3 +19,49 @@ body {
     background: var(--background);
     font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes fadein-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadein-up {
+  animation: fadein-up 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes about-glow {
+  0% {
+    box-shadow: 0 0 0px 0 #ffe066;
+  }
+  70% {
+    box-shadow: 0 0 32px 8px #ffe066;
+  }
+  100% {
+    box-shadow: 0 0 0px 0 #ffe066;
+  }
+}
+.animate-about-glow {
+  animation: about-glow 1.5s ease-in-out 1;
+}
+
+@keyframes about-underline {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+.animated-underline {
+  display: inline-block;
+  height: 4px;
+  background: linear-gradient(90deg, #ffe066, #ffd700);
+  border-radius: 2px;
+  width: 0;
+  animation: about-underline 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
+}

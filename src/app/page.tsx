@@ -7,6 +7,9 @@ import { useEffect, useRef, useState } from "react";
 export default function Page() {
     const getStartedRef = useRef<HTMLDivElement>(null);
     const [showClickMe, setShowClickMe] = useState(false);
+    const aboutRef = useRef<HTMLDivElement>(null);
+    const [aboutVisible, setAboutVisible] = useState(false);
+    const [aboutAnimKey, setAboutAnimKey] = useState(0);
 
     // Shared function to center the getStarted section
     function scrollToGetStarted() {
@@ -103,6 +106,26 @@ export default function Page() {
         };
     }, []);
 
+    useEffect(() => {
+        const observer = new window.IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setAboutVisible(true);
+                    setAboutAnimKey(prev => prev + 1); // restart animation
+                } else {
+                    setAboutVisible(false);
+                }
+            },
+            { threshold: 0.3 }
+        );
+        if (aboutRef.current) {
+            observer.observe(aboutRef.current);
+        }
+        return () => {
+            if (aboutRef.current) observer.unobserve(aboutRef.current);
+        };
+    }, []);
+
     return (
         <>
             {/* Hero Section with BG image */}
@@ -146,16 +169,18 @@ export default function Page() {
                     onClick={() => {
                         const about = document.getElementById('about');
                         if (about) {
+                            const nav = document.querySelector('nav');
+                            const navHeight = nav ? nav.offsetHeight : 0;
                             const rect = about.getBoundingClientRect();
                             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                            // Find the h2 inside the about section
-                            const h2 = about.querySelector('h2');
-                            let offset = about.offsetTop;
-                            if (h2) {
-                                // Offset to the h2 title
-                                const h2Rect = h2.getBoundingClientRect();
-                                offset = scrollTop + h2Rect.top - 150; // 32px for a little spacing above
-                            }
+                            const viewportHeight = window.innerHeight;
+                            const sectionHeight = rect.height;
+                            // Center the section: align its center with the viewport center below the navbar
+                            let offset = scrollTop + rect.top + sectionHeight / 1.2 - viewportHeight / 2 - navHeight / 2;
+                            // Clamp offset
+                            const maxScroll = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
+                            if (offset > maxScroll) offset = maxScroll;
+                            if (offset < 0) offset = 0;
                             window.scrollTo({ top: offset, behavior: 'smooth' });
                         }
                     }}
@@ -201,10 +226,19 @@ export default function Page() {
             </section>
 
             {/* About Section */}
-            <section id="about" className="w-full mt-36 mb-20 animate-fadein">
-                <div className="max-w-6xl mx-auto px-8">
+            <section id="about" className="w-full mt-36 mb-20">
+                <div
+                    ref={aboutRef}
+                    key={aboutAnimKey}
+                    className={`max-w-6xl mx-auto px-8 transition-all duration-700 ${aboutVisible ? "animate-fadein-up animate-about-glow" : "opacity-0 translate-y-10"}`}
+                >
                     <div className="flex items-center gap-3 mb-4">
-                        <h2 className="text-3xl md:text-4xl font-bold text-green-800 font-[cursive] drop-shadow">About LF Hub</h2>
+                        <h2 className="text-3xl md:text-4xl font-bold text-green-800 font-[cursive] drop-shadow relative">
+                          About LF Hub
+                          {aboutVisible && (
+                            <span className="absolute left-0 -bottom-2 w-full animated-underline" />
+                          )}
+                        </h2>
                         <Image src="/images/logo.png" alt="LF Hub Logo" width={40} height={40} className="rounded-full bg-white border-2 border-green-700" />
                     </div>
                     <div className="text-green-900 text-base md:text-xl mt-10 leading-relaxed space-y-6 font-sans">
