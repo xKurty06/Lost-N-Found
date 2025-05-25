@@ -51,6 +51,7 @@ coverage/
 out/
 tmp/
 temp/
+.next/
 
 # Misc
 *.seed
