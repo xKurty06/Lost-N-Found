@@ -81,7 +81,7 @@ Developed by students of **Cavite State University – BS Computer Science**:
 
 - **Zean Kurt G. Balboa** – [Github](https://github.com/xKurty06)
 - **Mark Andrei Dela Paz** – [GitHub](https://github.com/)
-- **[Ray Ardee Gaano** – [GitHub](https://github.com/)
+- **Ray Ardee Gaano** – [GitHub](https://github.com/)
 - **Raphael Reyes** – [GitHub](https://github.com/)
 
 ---
