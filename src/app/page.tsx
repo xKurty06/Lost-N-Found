@@ -114,7 +114,7 @@ export default function Page() {
                         fill
                         priority
                         className="object-cover object-center"
-                        style={{ filter: "blur(5px) brightness(0.7)" }}
+                        style={{ filter: "blur(5px) brightness(0.6)" }}
                         sizes="100vw"
                         quality={100}
                     />
