@@ -78,9 +78,9 @@ export default function LostItemPage() {
 				/>
 			</div>
 			<div className="max-w-5xl mx-auto pt-24">
-				<div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+				<div className="flex flex-col sm:flex-row items-center justify-center mb-8 gap-4">
 					{/* Top Bar: Title | Sort | Search */}
-					<div className="flex w-full items-center justify-between gap-4 bg-white rounded-full px-4 py-2 shadow">
+					<div className="flex w-10/12 items-center justify-between gap-4 bg-white rounded-full px-4 py-2 shadow">
 						{/* Title */}
 						<span className="text-lg md:text-xl font-bold text-green-900 whitespace-nowrap pl-2">
 							Lost Items

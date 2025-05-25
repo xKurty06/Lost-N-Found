@@ -122,6 +122,35 @@ export default function Page() {
         };
     }, []);
 
+    useEffect(() => {
+        // On mount, if there is a hash in the URL, scroll to that section smoothly
+        if (window.location.hash) {
+            const hash = window.location.hash;
+            setTimeout(() => {
+                const el = document.querySelector(hash);
+                if (el) {
+                    const nav = document.querySelector('nav');
+                    const navHeight = nav ? nav.offsetHeight : 0;
+                    let offset = el instanceof HTMLElement ? el.offsetTop : 0;
+                    // If there's a heading inside, scroll to it
+                    const h = el.querySelector('h2, h3, h1');
+                    if (h) {
+                        const hRect = h.getBoundingClientRect();
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        offset = scrollTop + hRect.top - navHeight - 24;
+                    } else {
+                        offset = offset - navHeight - 24;
+                    }
+                    // Clamp offset
+                    const maxScroll = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
+                    if (offset > maxScroll) offset = maxScroll;
+                    if (offset < 0) offset = 0;
+                    window.scrollTo({ top: offset, behavior: 'smooth' });
+                }
+            }, 100); // Delay to ensure DOM is ready
+        }
+    }, []);
+
     return (
         <>
             {/* Hero Section with BG image */}

@@ -2,8 +2,11 @@
 import Link from "next/link";
 import { FaUserCircle } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function Navbar() {
+    const router = useRouter();
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
     useEffect(() => {
         // Smooth scroll for nav links and trigger custom event for Lost/Found
         const handleNavClick = (e: Event) => {
@@ -14,7 +17,14 @@ export default function Navbar() {
             if (!target) return;
             const href = target.getAttribute('href');
             if (!href) return;
+            // If it's a hash link
             if (href.startsWith('#')) {
+                if (pathname !== '/') {
+                    e.preventDefault();
+                    // Use string interpolation for Next.js router
+                    router.push('/' + href);
+                    return;
+                }
                 const el = document.querySelector(href);
                 if (el) {
                     e.preventDefault();
@@ -50,7 +60,7 @@ export default function Navbar() {
         return () => {
             navLinks.forEach(link => link.removeEventListener('click', handleNavClick));
         };
-    }, []);
+    }, [pathname, router]);
 
     return (
         <nav className="bg-green-600 w-full fixed top-0 left-0 z-50 shadow-lg border-b border-green-700">
