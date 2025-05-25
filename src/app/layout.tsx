@@ -12,10 +12,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="en">
-            <body className="bg-background px-4 md:px-16 lg:px-32 xl:px-64">
-                <Navbar />
-                <div className="pt-20">{/* Add top padding to prevent content from being hidden behind navbar */}
-                    <main className="mx-auto w-full max-w-6xl">
+            <body className="bg-white">
+                <div className="fixed top-0 left-0 w-full z-40">
+                    <Navbar />
+                </div>
+                <div className="">
+                    <main>
                         {children}
                     </main>
                 </div>

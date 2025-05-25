@@ -11,7 +11,9 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-      },
+        accent: "#00ad5f",
+        'cvsu-yellow': "#ff9400",
+      }
     },
   },
   plugins: [],
