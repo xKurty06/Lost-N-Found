@@ -85,7 +85,7 @@ class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
         </form>
         <div className="flex flex-col items-center mt-4">
           <span className="text-white text-xs font-semibold">Just browsing?</span>
-          <Link href="/" className="text-accent font-semibold text-sm hover:underline">Continue as Guest</Link>
+          <Link href="/" className="text-green-400 font-semibold text-sm hover:underline">Continue as Guest</Link>
         </div>
         <form className="w-full mt-4" action="#" method="POST" onSubmit={e => { e.preventDefault(); }}>
           <div className="flex items-center justify-center">
@@ -180,7 +180,7 @@ export default function LoginPage() {
         <div className="hidden md:block w-px bg-white/40 my-12 mx-2 rounded-full" />
         {/* Right: Login Form */}
         <div className="flex-1 flex flex-col justify-center items-center p-8 md:p-14">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-green-600 mb-2 text-center tracking-wider">LOGIN</h2>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-green-400 mb-2 text-center tracking-wider">LOGIN</h2>
           <p className="text-white text-center text-base mb-6 font-semibold">Welcome to LF Hub</p>
           <LoginForm agree={agree} setAgree={setAgree} openModal={openModal} />
         </div>

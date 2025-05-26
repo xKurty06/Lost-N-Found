@@ -81,8 +81,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📄 Terms and Privacy
 
-- 📃 [Terms of Service](link-to-terms.html)
-- 🔒 [Privacy Policy](link-to-privacy.html)
+- 📃 [Terms of Service](src\legal\terms-of-service.md)
+- 🔒 [Privacy Policy](src\legal\privacy-policy.md)
 
 ---
 

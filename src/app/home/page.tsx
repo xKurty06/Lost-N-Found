@@ -200,13 +200,8 @@ export default function Page() {
                             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
                             const viewportHeight = window.innerHeight;
                             const sectionHeight = rect.height;
-                            // Center the section: align its center with the viewport center below the navbar
-                            let offset = scrollTop + rect.top + sectionHeight / 1.45 - viewportHeight / 2 - navHeight / 2;
-                            // Clamp offset
-                            const maxScroll = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
-                            if (offset > maxScroll) offset = maxScroll;
-                            if (offset < 0) offset = 0;
-                            window.scrollTo({ top: offset, behavior: 'smooth' });
+                            // Try using scrollIntoView with options for reliable centering
+                            about.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }
                     }}
                     className="bg-white bg-opacity-80 hover:bg-green-500 hover:text-white text-green-700 rounded-full p-3 shadow-lg transition-all duration-300 animate-bounce focus:scale-110 focus:bg-green-500 focus:text-white pointer-events-auto"
@@ -258,10 +253,10 @@ export default function Page() {
                 >
                     <div className="flex items-center gap-3 mb-4">
                         <h2 className="text-3xl md:text-4xl font-bold text-green-800 font-[cursive] drop-shadow relative">
-                          About LF Hub
-                          {aboutVisible && (
-                            <span className="absolute left-0 -bottom-2 w-full animated-underline" />
-                          )}
+                            About LF Hub
+                            {aboutVisible && (
+                                <span className="absolute left-0 -bottom-2 w-full animated-underline" />
+                            )}
                         </h2>
                         <Image src="/images/logo.png" alt="LF Hub Logo" width={40} height={40} className="rounded-full bg-white border-2 border-green-700" />
                     </div>
@@ -352,9 +347,9 @@ export default function Page() {
                         Send Feedback
                     </h3>
                     <form className="w-full max-w-xl flex flex-col gap-4">
-                        <input type="text" placeholder="Your Name *" className="w-full px-4 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-cvsu-yellow outline-none bg-white/80 text-green-900" required/>
-                        <input type="email" placeholder="Your Email *" className="w-full px-4 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-cvsu-yellow outline-none bg-white/80 text-green-900" required/>
-                        <textarea placeholder="Your Feedback or Message *" rows={4} className="w-full px-4 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-cvsu-yellow outline-none bg-white/80 text-green-900 resize-none" required/>
+                        <input type="text" placeholder="Your Name *" className="w-full px-4 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-cvsu-yellow outline-none bg-white/80 text-green-900" required />
+                        <input type="email" placeholder="Your Email *" className="w-full px-4 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-cvsu-yellow outline-none bg-white/80 text-green-900" required />
+                        <textarea placeholder="Your Feedback or Message *" rows={4} className="w-full px-4 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-cvsu-yellow outline-none bg-white/80 text-green-900 resize-none" required />
                         <button type="submit" className="bg-cvsu-yellow text-green-900 font-bold py-2 px-8 rounded-full shadow hover:bg-yellow-400 transition mt-2 self-end">Send</button>
                     </form>
                     <div className="text-xs text-gray-500 mt-2">We value your feedback and will get back to you as soon as possible.</div>
