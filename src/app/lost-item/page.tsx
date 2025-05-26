@@ -11,7 +11,7 @@ const lostItems = [
 		location: 'Near Bleachers',
 		note: 'Inilaan ko po sa Guard ng Gate 2',
 		color: 'Black',
-		image: '/images/wallet.jpg',
+		image: '/images/logo.png',
 	},
 	{
 		id: 2,
@@ -20,7 +20,7 @@ const lostItems = [
 		location: 'Outside DIT bldg.',
 		note: 'Binigay ko po sa Guard ng Gate 1',
 		color: 'Gray',
-		image: '/images/tumbler.jpg',
+		image: '/images/login-bg.png',
 	},
 	{
 		id: 3,
@@ -29,7 +29,7 @@ const lostItems = [
 		location: 'Sa Batibot malapit sa Museum',
 		note: 'Nasa Guard po ng Gate 3',
 		color: 'Brown',
-		image: '/images/cap.jpg',
+		image: '/images/cvsu-homebg.jpg',
 	},
 ];
 
