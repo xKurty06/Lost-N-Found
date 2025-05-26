@@ -3,12 +3,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import React, { useState } from 'react';
 
+// Import legal contents as React components
+import { termsOfService, privacyPolicy } from '../../legal/legal-contents';
+
 // Add type annotations for Modal props and openModal param
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  content: string;
+  content: React.ReactNode;
   onAgree: () => void;
 }
 
@@ -20,7 +23,7 @@ class Modal extends React.Component<ModalProps> {
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
         <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative animate-fadein-up">
           <h3 className="text-xl font-bold mb-4 text-green-700">{title}</h3>
-          <div className="prose max-h-80 overflow-y-auto text-gray-800 mb-6" style={{ whiteSpace: 'pre-wrap' }}>{content}</div>
+          <div className="prose max-h-80 overflow-y-auto text-gray-800 mb-6">{content}</div>
           <div className="flex justify-end gap-2">
             <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 font-semibold">Cancel</button>
             <button onClick={onAgree} className="px-4 py-2 rounded bg-cvsu-yellow text-green-900 font-bold hover:bg-yellow-400">Agree</button>
@@ -31,14 +34,8 @@ class Modal extends React.Component<ModalProps> {
   }
 }
 
-// Import legal contents from JSON
-import legalContents from '../../legal/legal-contents.json';
-
-const TERMS_CONTENT: string = (legalContents as any).terms;
-const PRIVACY_CONTENT: string = (legalContents as any).privacy;
-
-// If privacy policy is missing in the JSON, fallback to markdown file
-// (Optional: You can add logic here to fetch from '../../legal/privacy-policy.md' if needed)
+const TERMS_CONTENT = termsOfService;
+const PRIVACY_CONTENT = privacyPolicy;
 
 interface LoginFormProps {
   agree: boolean;
@@ -141,7 +138,7 @@ class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
 export default function LoginPage() {
   const [agree, setAgree] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState('');
+  const [modalContent, setModalContent] = useState<React.ReactNode>(null);
   const [modalTitle, setModalTitle] = useState('');
   const [modalStep, setModalStep] = useState<'none' | 'terms' | 'privacy'>('none');
 

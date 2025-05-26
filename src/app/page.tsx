@@ -176,7 +176,7 @@ export default function Page() {
                             Lost something? Found something?<br />
                             <span className="text-cvsu-yellow font-extrabold animate-pulse">We're here to help</span> – get started now!
                         </p>
-                        <Link href="#getStarted" className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition mt-14 relative" onClick={e => {
+                        <Link href="#getStarted" className="bg-green-500 hover:bg-green-600  text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition mt-14 relative" onClick={e => {
                             e.preventDefault();
                             scrollToGetStarted();
                         }}>
@@ -209,7 +209,7 @@ export default function Page() {
                             window.scrollTo({ top: offset, behavior: 'smooth' });
                         }
                     }}
-                    className="bg-white bg-opacity-80 hover:bg-green-500 hover:text-white text-green-700 rounded-full p-3 shadow-lg transition-all duration-300 animate-bounce focus:scale-110 focus:bg-green-600 focus:text-white pointer-events-auto"
+                    className="bg-white bg-opacity-80 hover:bg-green-500 hover:text-white text-green-700 rounded-full p-3 shadow-lg transition-all duration-300 animate-bounce focus:scale-110 focus:bg-green-500 focus:text-white pointer-events-auto"
                     tabIndex={0}
                 >
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

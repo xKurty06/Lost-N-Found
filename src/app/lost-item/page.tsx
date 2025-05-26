@@ -158,7 +158,7 @@ export default function LostItemPage() {
 									/>
 								</div>
 								<div className="w-full">
-									<h2 className="font-bold text-lg mb-1">{item.title}</h2>
+									<h2 className="font-bold text-lg mb-1">n{item.title}</h2>
 									<p className="text-xs text-gray-700 mb-1">
 										{item.date}
 									</p>

@@ -63,7 +63,7 @@ export default function Navbar() {
     }, [pathname, router]);
 
     return (
-        <nav className="bg-green-600 w-full fixed top-0 left-0 z-50 shadow-lg border-b border-green-700">
+        <nav className="bg-green-500 w-full fixed top-0 left-0 z-50 shadow-lg border-b border-green-700">
             <div className="max-w-6xl mx-auto px-6 md:px-8 py-2 flex items-center justify-between">
                 {/* Left: Logo, Site Name, and Navs */}
                 <div className="flex items-center gap-4">
