@@ -73,11 +73,11 @@ class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
               Password<span className="text-red-500 ml-1">*</span>
             </label>
             <input type={showPassword ? 'text' : 'password'} id="password" placeholder="Password" name="password" required className="w-full px-4 py-2 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-cvsu-yellow shadow pr-10" />
-            <button type="button" tabIndex={-1} className="absolute right-3 top-9 text-gray-500 hover:text-green-700" onClick={() => this.setState({ showPassword: !showPassword })} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+            <button type="button" tabIndex={-1} className="absolute right-3 top-8 text-gray-600 hover:text-green-700 transition-colors duration-150 bg-white/90 rounded-full p-1" onClick={() => this.setState({ showPassword: !showPassword })} aria-label={showPassword ? 'Hide password' : 'Show password'}>
               {showPassword ? (
-                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0 1 12 19c-5 0-9-4-9-7s4-7 9-7c1.13 0 2.21.19 3.22.54M19.07 4.93A9.97 9.97 0 0 1 21 12c0 1.61-.5 3.13-1.36 4.41M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path strokeLinecap="round" strokeLinejoin="round" d="m3 3 18 18" /></svg>
+                <Image src="/icons/hide_password.png" alt="Hide password" width={22} height={22} className="transition-transform duration-150 hover:scale-105" />
               ) : (
-                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2 12S5 5 12 5s10 7 10 7-3 7-10 7S2 12 2 12Z" /></svg>
+                <Image src="/icons/show_password.png" alt="Show password" width={22} height={22} className="transition-transform duration-150 hover:scale-105" />
               )}
             </button>
           </div>

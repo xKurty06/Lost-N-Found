@@ -162,21 +162,20 @@ export default function Page() {
                         fill
                         priority
                         className="object-cover object-center"
-                        style={{ filter: "blur(5px) brightness(0.6)" }}
                         sizes="100vw"
                         quality={100}
                     />
                 </div>
                 <div className="flex flex-col w-full max-w-4xl px-8 pt-24 pb-10 relative z-10">
-                    <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-lg mb-32 tracking-tight mt-36" style={{ fontFamily: 'cursive' }}>
+                    <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-[0_6px_32px_rgba(0,0,0,0.7)] mb-32 tracking-tight mt-36">
                         Welcome!
                     </h1>
                     <div className="items-center justify-center text-center">
-                        <p className="text-2xl md:text-3xl font-semibold text-white drop-shadow mb-20 tracking-wide animate-fadein-slow">
+                        <p className="text-2xl md:text-4xl font-semibold text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] mb-20 tracking-wide animate-fadein-slow">
                             Lost something? Found something?<br />
-                            <span className="text-cvsu-yellow font-extrabold animate-pulse">We're here to help</span> – get started now!
+                            <span className="text-cvsu-yellow font-extrabold animate-pulse text-5xl drop-shadow-[0_2px_16px_rgba(255,224,102,0.7)]">We're here to help</span> – get started now!
                         </p>
-                        <Link href="#getStarted" className="bg-green-500 hover:bg-green-600  text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition mt-14 relative" onClick={e => {
+                        <Link href="#getStarted" className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-xl shadow-green-900/30 transition mt-14 relative focus:ring-4 focus:ring-cvsu-yellow/60 focus:outline-none" onClick={e => {
                             e.preventDefault();
                             scrollToGetStarted();
                         }}>
@@ -214,7 +213,7 @@ export default function Page() {
             </div>
 
             {/* Lost/Found Banner Section */}
-            <section id="getStarted" className="w-full" style={{ background: '#006f3d' }}>
+            <section id="getStarted" className="w-full border-b-[5px] border-b-cvsu-yellow" style={{ background: '#006f3d' }}>
                 <div ref={getStartedRef} className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-12 px-4 py-24 relative">
                     {/* LOST ITEM */}
                     <Link href="/lost-item" className="flex flex-col items-center w-full md:w-1/2 max-w-md">
@@ -252,7 +251,7 @@ export default function Page() {
                     className={`max-w-6xl mx-auto px-8 transition-all duration-700 ${aboutVisible ? "animate-fadein-up animate-about-glow" : "opacity-0 translate-y-10"}`}
                 >
                     <div className="flex items-center gap-3 mb-4">
-                        <h2 className="text-3xl md:text-4xl font-bold text-green-800 font-[cursive] drop-shadow relative">
+                        <h2 className="text-3xl md:text-4xl font-bold text-green-800 drop-shadow relative">
                             About LF Hub
                             {aboutVisible && (
                                 <span className="absolute left-0 -bottom-2 w-full animated-underline" />
@@ -286,21 +285,21 @@ export default function Page() {
             {/* 3 Quick Steps Section */}
             <section className="w-full px-4 animate-fadein-slow">
                 <div className="max-w-5xl mx-auto mb-12 flex flex-col items-center">
-                    <h3 className="text-3xl md:text-4xl font-bold text-green-700 mb-12 mt-4 text-center font-[cursive] drop-shadow">3 Quick Steps</h3>
+                    <h3 className="text-3xl md:text-4xl font-bold text-green-700 mb-12 mt-4 text-center drop-shadow">3 Quick Steps</h3>
                     <div className="flex flex-col md:flex-row gap-8 md:gap-10 w-full justify-center items-stretch mb-26">
                         <div className="flex flex-col items-center border border-green-400 rounded-2xl p-10 w-full max-w-[270px] min-h-[340px] bg-white/80 shadow-xl transition-shadow hover:shadow-2xl flex-1 animate-slidein-up">
                             <img src="/icons/report-icon.png" alt="Report Icon" className="h-16 w-16 mb-7 drop-shadow-lg" />
-                            <span className="font-extrabold text-2xl mb-3 text-green-800">Report</span>
+                            <span className="font-extrabold text-2xl mb-3 text-green-800 font-[cursive]">Report</span>
                             <span className="text-lg text-gray-700 text-center">Submit details of item you found.</span>
                         </div>
                         <div className="flex flex-col items-center border border-green-400 rounded-2xl p-10 w-full max-w-[270px] min-h-[340px] bg-white/80 shadow-xl transition-shadow hover:shadow-2xl flex-1 animate-slidein-up delay-100">
                             <img src="/icons/find-icon.png" alt="Browse Icon" className="h-16 w-16 mb-7 drop-shadow-lg" />
-                            <span className="font-extrabold text-2xl mb-3 text-green-800">Browse</span>
+                            <span className="font-extrabold text-2xl mb-3 text-green-800 font-[cursive]">Browse</span>
                             <span className="text-lg text-gray-700 text-center">Find and browse reported found items.</span>
                         </div>
                         <div className="flex flex-col items-center border border-green-400 rounded-2xl p-10 w-full max-w-[270px] min-h-[340px] bg-white/80 shadow-xl transition-shadow hover:shadow-2xl flex-1 animate-slidein-up delay-200">
                             <img src="/icons/found-icon.png" alt="Claim Icon" className="h-16 w-16 mb-7 drop-shadow-lg" />
-                            <span className="font-extrabold text-2xl mb-3 text-green-800">Claim</span>
+                            <span className="font-extrabold text-2xl mb-3 text-green-800 font-[cursive]">Claim</span>
                             <span className="text-lg text-gray-700 text-center">Confirm and reclaim your item.</span>
                         </div>
                     </div>

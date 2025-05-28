@@ -72,7 +72,6 @@ export default function LostItemPage() {
 					fill
 					priority
 					className="object-cover object-center"
-					style={{ filter: 'blur(5px) brightness(0.5)' }}
 					sizes="100vw"
 					quality={100}
 				/>
@@ -158,7 +157,7 @@ export default function LostItemPage() {
 									/>
 								</div>
 								<div className="w-full">
-									<h2 className="font-bold text-lg mb-1">n{item.title}</h2>
+									<h2 className="font-bold text-lg mb-1">{item.title}</h2>
 									<p className="text-xs text-gray-700 mb-1">
 										{item.date}
 									</p>
@@ -175,7 +174,7 @@ export default function LostItemPage() {
 										{item.color}
 									</p>
 								</div>
-								<button className="mt-auto bg-green-700 text-white rounded-lg px-6 py-2 font-semibold hover:bg-green-800 transition">
+								<button className="mt-auto bg-green-700 text-white rounded-lg px-6 py-2 font-semibold hover:bg-cvsu-yellow transition">
 									Claim Item
 								</button>
 							</div>
