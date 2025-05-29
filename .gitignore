@@ -130,3 +130,6 @@ yarn.lock
 test-results/
 *.tsbuildinfo
 .qodo
+
+# Project database reference
+/database.txt
