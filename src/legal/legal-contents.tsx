@@ -40,6 +40,10 @@ export const termsOfService = (
         <strong>Changes to the Terms</strong><br />
         LF Hub may update these Terms of Service at any time. You will be notified of major changes, and continued use of the site indicates your acceptance of the revised terms.
       </li>
+      <li>
+        <strong>Lost Item Post Expiry</strong><br />
+        Lost item posts will be automatically deleted after 30 days to help manage storage and system performance. Users may re-upload or repost their found items if needed after deletion.
+      </li>
     </ol>
   </div>
 );
