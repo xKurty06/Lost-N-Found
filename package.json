@@ -11,15 +11,20 @@
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
-    "next": "15.0.3",
+    "next": "^15.3.3",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "react-icons": "^5.5.0"
   },
   "devDependencies": {
+    "@types/cookie": "^0.6.0",
+    "@types/json5": "^0.0.30",
     "@types/node": "^20",
+    "@types/phoenix": "^1.6.6",
+    "@types/prop-types": "^15.7.14",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/ws": "^8.18.1",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "postcss": "^8",
