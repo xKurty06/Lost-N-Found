@@ -7,11 +7,11 @@ export default function RootLayout({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
     const pathname = usePathname();
-    const hideNavbar = pathname.startsWith('/login');
+    const showNavbar = pathname !== '/register' && pathname !== '/login';
     return (
         <html lang="en">
             <body className="bg-white">
-                {!hideNavbar && (
+                {showNavbar && (
                     <div className="fixed top-0 left-0 w-full z-40">
                         <Navbar />
                     </div>
