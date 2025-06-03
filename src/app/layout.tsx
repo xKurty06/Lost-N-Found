@@ -2,6 +2,7 @@
 import { usePathname } from 'next/navigation';
 import Navbar from "./navbar";
 import "./globals.css";
+import ToastProvider from '../components/ui/ToastProvider';
 
 export default function RootLayout({
     children,
@@ -11,16 +12,18 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className="bg-white">
-                {showNavbar && (
-                    <div className="fixed top-0 left-0 w-full z-40">
-                        <Navbar />
+                <ToastProvider>
+                    {showNavbar && (
+                        <div className="fixed top-0 left-0 w-full z-40">
+                            <Navbar />
+                        </div>
+                    )}
+                    <div className="">
+                        <main>
+                            {children}
+                        </main>
                     </div>
-                )}
-                <div className="">
-                    <main>
-                        {children}
-                    </main>
-                </div>
+                </ToastProvider>
             </body>
         </html>
     );
