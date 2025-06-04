@@ -87,7 +87,7 @@ function LoginForm() {
           )}
         </button>
       </div>
-      <button type="submit" className="w-full mt-2 bg-cvsu-yellow text-green-900 font-bold py-2 rounded-full shadow hover:bg-yellow-400 transition disabled:opacity-60" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+      <button type="submit" className="w-full mt-2 bg-green-600 text-white font-bold py-2 rounded-full shadow hover:bg-green-600/60 transition disabled:opacity-60" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
       <div className="flex flex-col items-center mt-4">
         <span className="text-white text-xs font-semibold">Don't have an account?</span>
         <Link href="/register" className="text-green-400 font-semibold text-sm hover:underline">Register</Link>

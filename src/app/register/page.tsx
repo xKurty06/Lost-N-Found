@@ -93,7 +93,10 @@ function RegisterForm({ agree, setAgree, openModal }: RegisterFormProps) {
                 return;
             }
             setLoading(false);
-            showToast('Registration successful! You can now log in.', 'success');
+            showToast('Registration successful! You can now log in.', 'success', 7000); // 7 seconds
+            setTimeout(() => {
+                router.push('/login');
+            }, 2000); // 2 seconds delay before redirect
             if (usernameRef.current) usernameRef.current.value = '';
             if (passwordRef.current) passwordRef.current.value = '';
             if (confirmPasswordRef.current) confirmPasswordRef.current.value = '';
@@ -202,7 +205,7 @@ function RegisterForm({ agree, setAgree, openModal }: RegisterFormProps) {
                 </div>
                 {/* General error (e.g. Supabase error) */}
                 {error && <div className="text-red-500 text-sm text-center font-semibold mt-2">{error}</div>}
-                <button type="submit" className="w-full mt-2 bg-cvsu-yellow text-green-900 font-bold py-2 rounded-full shadow hover:bg-yellow-400 transition disabled:opacity-60" disabled={!agree || loading}>{loading ? 'Registering...' : 'Register'}</button>
+                <button type="submit" className="w-full mt-2 bg-green-600 text-white font-bold py-2 rounded-full shadow hover:bg-green-600/60 transition disabled:opacity-60" disabled={!agree || loading}>{loading ? 'Registering...' : 'Register'}</button>
             </form>
             <div className="flex flex-col items-center mt-4">
                 <span className="text-white text-xs font-semibold">Already have an account?</span>

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
+import Link from "next/link";
 
 const lostItems = [
 	{
@@ -24,6 +25,15 @@ const lostItems = [
 	},
 	{
 		id: 3,
+		title: 'Cap',
+		date: '2 days ago, 11:27am',
+		location: 'Sa Batibot malapit sa Museum',
+		note: 'Nasa Guard po ng Gate 3',
+		color: 'Brown',
+		image: '/images/cvsu-homebg.jpg',
+	},
+	{
+		id: 4,
 		title: 'Cap',
 		date: '2 days ago, 11:27am',
 		location: 'Sa Batibot malapit sa Museum',
@@ -78,12 +88,24 @@ export default function LostItemPage() {
 			</div>
 			<div className="max-w-5xl mx-auto pt-24">
 				<div className="flex flex-col sm:flex-row items-center justify-center mb-8 gap-4">
-					{/* Top Bar: Title | Sort | Search */}
+					{/* Top Bar: Navigation | Title | Sort | Search */}
 					<div className="flex w-10/12 items-center justify-between gap-4 bg-white rounded-full px-4 py-2 shadow">
-						{/* Title */}
-						<span className="text-lg md:text-xl font-bold text-green-900 whitespace-nowrap pl-2">
-							Lost Items
-						</span>
+						{/* Navigation Bar (inline) */}
+						<div className="flex gap-2 mr-4">
+							<Link
+								href="/lost-item"
+								className="flex items-center gap-2 px-4 py-1.5 rounded-full font-semibold transition bg-green-700 text-white border-2 border-green-700 shadow scale-105 pointer-events-none focus:outline-none focus:ring-2 focus:ring-green-400 text-sm"
+								aria-current="page"
+							>
+								Lost
+							</Link>
+							<Link
+								href="/found-item"
+								className="flex items-center gap-2 px-4 py-1.5 rounded-full font-semibold transition bg-white text-green-700 border-2 border-green-700 hover:bg-green-50 shadow hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm"
+							>
+								Found
+							</Link>
+						</div>
 						{/* Sort Dropdown */}
 						<div className="flex items-center relative">
 							<select
@@ -182,7 +204,7 @@ export default function LostItemPage() {
 					)}
 				</div>
 				<button className="fixed bottom-10 right-10 bg-green-600 hover:bg-green-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-2xl text-4xl border-4 border-white">
-					<span>+</span>
+					<span className='pb-2'>+</span>
 				</button>
 			</div>
 		</div>
