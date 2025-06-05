@@ -65,7 +65,7 @@ function LoginForm() {
     <form className="w-full max-w-md flex flex-col gap-4" onSubmit={handleLogin}>
       <div className="flex flex-col gap-1 relative">
         <label htmlFor="username" className="text-white font-semibold flex items-center gap-2">
-          <span className="inline-block"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 14c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4Z"/></svg></span>
+          <span className="inline-block"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 14c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4Z" /></svg></span>
           Username<span className="text-red-500 ml-1">*</span>
         </label>
         <div className="relative">
@@ -89,8 +89,17 @@ function LoginForm() {
       </div>
       <button type="submit" className="w-full mt-2 bg-green-600 text-white font-bold py-2 rounded-full shadow hover:bg-green-600/60 transition disabled:opacity-60" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
       <div className="flex flex-col items-center mt-4">
-        <span className="text-white text-xs font-semibold">Don't have an account?</span>
-        <Link href="/register" className="text-green-400 font-semibold text-sm hover:underline">Register</Link>
+        <div className="flex flex-row items-center gap-3">
+          <div className="flex flex-col items-center">
+            <span className="text-white text-xs font-bold">Don't have an account?</span>
+            <Link href="/register" className="text-green-400 font-semibold text-sm hover:underline mt-1">Register</Link>
+          </div>
+          <span className="block w-px h-10 bg-white/40 mx-2 rounded-full" />
+          <div className="flex flex-col items-center">
+            <span className="text-white text-xs font-bold">Just browsing?</span>
+            <Link href="/home" className="text-green-400 font-semibold text-sm hover:underline mt-1">Continue as Guest</Link>
+          </div>
+        </div>
       </div>
     </form>
   );

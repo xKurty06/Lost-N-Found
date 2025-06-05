@@ -13,6 +13,7 @@ export default {
         foreground: "var(--foreground)",
         accent: "#00ad5f",
         'cvsu-yellow': "#ff9400",
+        
       }
     },
   },

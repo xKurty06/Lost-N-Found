@@ -208,8 +208,17 @@ function RegisterForm({ agree, setAgree, openModal }: RegisterFormProps) {
                 <button type="submit" className="w-full mt-2 bg-green-600 text-white font-bold py-2 rounded-full shadow hover:bg-green-600/60 transition disabled:opacity-60" disabled={!agree || loading}>{loading ? 'Registering...' : 'Register'}</button>
             </form>
             <div className="flex flex-col items-center mt-4">
-                <span className="text-white text-xs font-semibold">Already have an account?</span>
-                <Link href="/login" className="text-green-400 font-semibold text-sm hover:underline">Login</Link>
+                <div className="flex flex-row items-center gap-3">
+                    <div className="flex flex-col items-center">
+                        <span className="text-white text-xs font-bold">Already have an account?</span>
+                        <Link href="/login" className="text-green-400 font-semibold text-sm hover:underline mt-1">Login</Link>
+                    </div>
+                    <span className="block w-px h-10 bg-white/40 mx-2 rounded-full" />
+                    <div className="flex flex-col items-center">
+                        <span className="text-white text-xs font-bold">Just browsing?</span>
+                        <Link href="/home" className="text-green-400 font-semibold text-sm hover:underline mt-1">Continue as Guest</Link>
+                    </div>
+                </div>
             </div>
             <form className="w-full mt-4" action="#" method="POST" onSubmit={e => { e.preventDefault(); }}>
                 <div className="flex items-center justify-center">
