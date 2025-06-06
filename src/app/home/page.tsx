@@ -230,13 +230,15 @@ export default function Page() {
                     </Link>
                     {/* FOUND */}
                     <div className="flex flex-col items-center w-full md:w-1/2 max-w-md">
-                        <button className={`flex items-center bg-[#003e22] bg-opacity-90 rounded-xl px-13 py-6 shadow-lg transition hover:bg-green-800 group w-full justify-center transform hover:scale-105 duration-200 relative ${showClickMe ? 'ring-4 ring-yellow-400 animate-bounce' : ''}`}>
-                            <span className="text-4xl md:text-5xl font-extrabold text-gray-100 tracking-wide font-[cursive]">FOUND ITEM</span>
-                            <img src="/icons/founditem-icon.svg" alt="Found Icon" className="w-14 h-14 ml-4" />
-                            {showClickMe && (
-                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ff9400] text-black font-bold px-3 py-1 rounded-full text-sm shadow-lg animate-pulse z-10">Click me!</span>
-                            )}
-                        </button>
+                        <Link href="/found-item" className="w-full">
+                            <button className={`flex items-center bg-[#003e22] bg-opacity-90 rounded-xl px-13 py-6 shadow-lg transition hover:bg-green-800 group w-full justify-center transform hover:scale-105 duration-200 relative ${showClickMe ? 'ring-4 ring-yellow-400 animate-bounce' : ''}`}>
+                                <span className="text-4xl md:text-5xl font-extrabold text-gray-100 tracking-wide font-[cursive]">FOUND ITEM</span>
+                                <img src="/icons/founditem-icon.svg" alt="Found Icon" className="w-14 h-14 ml-4" />
+                                {showClickMe && (
+                                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ff9400] text-black font-bold px-3 py-1 rounded-full text-sm shadow-lg animate-pulse z-10">Click me!</span>
+                                )}
+                            </button>
+                        </Link>
                         <span className="text-white text-base md:text-lg font-medium text-center mt-4">
                             Archive of items marked as found, where lost<br />items are moved once identified.
                         </span>
@@ -314,7 +316,7 @@ export default function Page() {
                 <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 rounded-3xl shadow-2xl border border-green-200 bg-white/80 backdrop-blur-lg p-10">
                     <div className="flex flex-col items-start gap-4 w-full">
                         <h3 className="text-3xl font-extrabold text-green-700 mb-2 flex items-center gap-2">
-                            <svg className="w-8 h-8 text-cvsu-yellow" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 10.5V6.75A2.25 2.25 0 0 0 18.75 4.5H5.25A2.25 2.25 0 0 0 3 6.75v10.5A2.25 2.25 0 0 0 5.25 19.5h13.5A2.25 2.25 0 0 0 21 17.25V13.5" /></svg>
+                            <img src="/icons/contact.svg" alt="Contact Icon" className="w-8 h-8"/>
                             Contact Us
                         </h3>
                         <div className="flex flex-col gap-2 text-lg text-green-900">
@@ -342,7 +344,7 @@ export default function Page() {
             <section id="feedback" className="w-full bg-gradient-to-br from-yellow-50 via-white to-green-50 py-16 px-4">
                 <div className="max-w-4xl mx-auto flex flex-col items-center justify-center rounded-3xl shadow-2xl border border-green-200 bg-white/80 backdrop-blur-lg p-10">
                     <h3 className="text-2xl font-bold text-green-700 mb-6 flex items-center gap-2">
-                        <svg className="w-7 h-7 text-cvsu-yellow" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h.01M8.5 4.5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        <img src="/icons/feedback.svg" alt="Feedback Icon" className="w-7 h-7"/>
                         Send Feedback
                     </h3>
                     <form className="w-full max-w-xl flex flex-col gap-4">
