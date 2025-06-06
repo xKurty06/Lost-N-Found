@@ -89,7 +89,7 @@ export default function Navbar() {
                 {/* Right: Login Button */}
                 <Link
                     href="/login"
-                    className="flex items-center gap-2 text-white font-semibold text-base px-4 py-2 rounded-lg hover:bg-cvsu-yellow hover:text-green-900 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-cvsu-yellow"
+                    className="flex items-center gap-2 text-white font-semibold text-base px-4 py-2 rounded-lg hover:bg-cvsu-yellow hover:text-green-900 transition focus:outline-none focus:ring-2 focus:ring-cvsu-yellow"
                 >
                     <FaUserCircle className="text-2xl" />
                     <span className="hidden sm:inline">Login</span>
