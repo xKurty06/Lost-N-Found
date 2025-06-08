@@ -250,7 +250,7 @@ export default function Page() {
             <section id="about" className="w-full mt-36 mb-20">
                 <div
                     ref={aboutRef}
-                    className={`max-w-6xl mx-auto px-8 transition-all duration-700 ${aboutVisible ? "animate-fadein-up animate-about-glow" : "opacity-0 translate-y-10"}`}
+                    className={`max-w-6xl mx-auto px-8 py-10 transition-all duration-700 ${aboutVisible ? "animate-fadein-up animate-about-glow" : "opacity-0 translate-y-10"}`}
                 >
                     <div className="flex items-center gap-3 mb-4">
                         <h2 className="text-3xl md:text-4xl font-bold text-green-800 drop-shadow relative">
