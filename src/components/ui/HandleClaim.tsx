@@ -18,6 +18,7 @@ export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
     const [name, setName] = useState('');
     const [studentNumber, setStudentNumber] = useState('');
     const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
     const [image, setImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [idImage, setIdImage] = useState<File | null>(null);
@@ -48,18 +49,11 @@ export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
 
     useEffect(() => {
         if (!open) return;
-        function handleClickOutside(e: MouseEvent) {
-            if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-                onClose();
-            }
-        }
         function handleEscape(e: KeyboardEvent) {
             if (e.key === 'Escape') onClose();
         }
-        document.addEventListener('mousedown', handleClickOutside);
         document.addEventListener('keydown', handleEscape);
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('keydown', handleEscape);
         };
     }, [open, onClose]);
@@ -139,6 +133,15 @@ export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
             showToast('Please describe the characteristics of the item.', 'error');
             return;
         }
+        if (!email.trim()) {
+            showToast('Email is required.', 'error');
+            return;
+        }
+        // Email format validation
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            showToast('Please enter a valid email address.', 'error');
+            return;
+        }
         if (!brand.trim()) {
             showToast('Please enter the brand of the item.', 'error');
             return;
@@ -157,6 +160,12 @@ export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
         }
         if (!studentNumber.trim()) {
             showToast('Student Number is required.', 'error');
+            return;
+        }
+        // Student number must be exactly 9 digits
+        const cleanedStudentNumber = studentNumber.trim().replace(/\D/g, '');
+        if (cleanedStudentNumber.length !== 9) {
+            showToast('Student Number must be exactly 9 digits.', 'error');
             return;
         }
         if (!phone.trim()) {
@@ -187,29 +196,45 @@ export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
             const supabase = require('@/supabase/clients/client').createClient();
             const proofFileName = `proof_${item.id}_${Date.now()}`;
             const idFileName = `id_${item.id}_${Date.now()}`;
+            // Upload proof image (first image field)
             let proofImageUrl = '';
+            if (image) {
+                const { data: proofUpload, error: proofError } = await supabase.storage.from('claim-images').upload(proofFileName, image, { upsert: true });
+                if (proofError) throw new Error('Failed to upload proof image.');
+                if (proofUpload && proofUpload.path) {
+                    proofImageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/claim-images/${proofUpload.path}`;
+                }
+                if (!proofImageUrl) throw new Error('Failed to get proof image URL.');
+            } else {
+                throw new Error('Image proof is required.');
+            }
+            // Upload student ID image (second image field)
             let idImageUrl = '';
-            // Upload proof image
-            const { data: proofUpload, error: proofError } = await supabase.storage.from('claim-images').upload(proofFileName, image);
-            if (proofError) throw new Error('Failed to upload proof image.');
-            proofImageUrl = supabase.storage.from('claim-images').getPublicUrl(proofFileName).publicUrl;
-            // Upload ID image
-            const { data: idUpload, error: idError } = await supabase.storage.from('claim-images').upload(idFileName, idImage);
-            if (idError) throw new Error('Failed to upload ID image.');
-            idImageUrl = supabase.storage.from('claim-images').getPublicUrl(idFileName).publicUrl;
+            if (idImage) {
+                const { data: idUpload, error: idError } = await supabase.storage.from('claim-images').upload(idFileName, idImage, { upsert: true });
+                if (idError) throw new Error('Failed to upload ID image.');
+                if (idUpload && idUpload.path) {
+                    idImageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/claim-images/${idUpload.path}`;
+                }
+                if (!idImageUrl) throw new Error('Failed to get ID image URL.');
+            } else {
+                throw new Error('ID image is required.');
+            }
             // Insert into pending_claims
             const { error: insertError } = await supabase.from('pending_claims').insert({
+                description: reason,
+                characteristics,
                 item_id: item.id,
                 claimer_id: user.id,
                 full_name: name,
+                student_number: studentNumber,
                 contact_number: phone,
-                email: user.email || '',
+                email,
                 proof_image_url: proofImageUrl,
                 student_id_image_url: idImageUrl,
-                legal_agreement: true,
                 status: 'pending',
             });
-            if (insertError) throw new Error('Failed to submit claim.');
+            if (insertError) throw new Error(insertError.message || 'Failed to submit claim.');
             // Update item status to 'pending'
             await supabase.from('items').update({ status: 'pending' }).eq('id', item.id);
             showToast('Claim submitted!', 'success');
@@ -240,11 +265,14 @@ export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
                     </button>
                     <h2 className="text-2xl font-extrabold text-green-800 mb-6 text-center">Claim Item</h2>
                     <div className="flex flex-col gap-4">
-                        <label className="font-semibold text-green-900">Please state why this item is yours<span className="text-red-500">*</span>
+                        <label className="font-semibold text-green-900">Why do you believe this item is yours? <span className="text-red-500">*</span>
                             <textarea className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-cvsu-yellow outline-none resize-none" value={reason} onChange={e => setReason(e.target.value)} required rows={3} maxLength={300} placeholder="Describe the item in as much detail as possible, especially what is not visible or has not been described." />
                         </label>
                         <label className="font-semibold text-green-900">Can you describe the characteristics of the item?<span className="text-red-500">*</span>
                             <input type="text" className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-cvsu-yellow outline-none" value={characteristics} onChange={e => setCharacteristics(e.target.value)} required maxLength={100} placeholder="e.g. Has a scratch, sticker, etc." />
+                        </label>
+                        <label className="font-semibold text-green-900">Email<span className="text-red-500">*</span>
+                            <input type="email" className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-cvsu-yellow outline-none" value={email} onChange={e => setEmail(e.target.value)} required maxLength={100} placeholder="e.g. john.doe@email.com" />
                         </label>
                         <label className="font-semibold text-green-900">What is the Brand of the item?<span className="text-red-500">*</span>
                             <input type="text" className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-cvsu-yellow outline-none" value={brand} onChange={e => setBrand(e.target.value)} required maxLength={50} placeholder="e.g. Nike, Adidas, etc." />
@@ -337,9 +365,16 @@ export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
                                 type="text"
                                 className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-cvsu-yellow outline-none"
                                 value={studentNumber}
-                                onChange={e => setStudentNumber(e.target.value)}
+                                onChange={e => {
+                                    // Only allow digits
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    setStudentNumber(val);
+                                }}
                                 required
-                                maxLength={20}
+                                maxLength={9}
+                                minLength={9}
+                                inputMode="numeric"
+                                pattern="\d{9}"
                                 placeholder="e.g. 202401234"
                             />
                         </label>

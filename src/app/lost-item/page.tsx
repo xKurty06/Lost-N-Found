@@ -684,7 +684,7 @@ export default function LostItemPage() {
 					<span className='pb-2'>+</span>
 				</button>
 				<div style={{ display: reportOpen ? 'block' : 'none' }}>
-				  <HandleReport open={true} onClose={() => setReportOpen(false)} />
+					<HandleReport open={true} onClose={() => setReportOpen(false)} />
 				</div>
 				<HandleClaim open={claimOpen} onClose={() => setClaimOpen(false)} onSubmit={() => setClaimOpen(false)} claimItem={claimItem} />
 				<div className="h-16 sm:h-24" /> {/* Spacer at the bottom for extra space below content and FAB */}

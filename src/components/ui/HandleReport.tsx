@@ -194,6 +194,20 @@ export default function HandleReport({ open, onClose, onSubmit }: {
         };
     }, [open]);
 
+    // Add this effect after colorDropdownRef and colorDropdownOpen are defined
+    React.useEffect(() => {
+        if (!colorDropdownOpen) return;
+        function handleClickOutside(event: MouseEvent) {
+            if (colorDropdownRef.current && !colorDropdownRef.current.contains(event.target as Node)) {
+                setColorDropdownOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [colorDropdownOpen]);
+
     function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (file) {
@@ -402,36 +416,38 @@ export default function HandleReport({ open, onClose, onSubmit }: {
                         <textarea className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-cvsu-yellow outline-none resize-none" value={description} onChange={e => setDescription(e.target.value)} required rows={3} maxLength={300} placeholder="Describe the item, any unique features, etc." />
                     </label>
                     <label className="font-semibold text-green-900">Color(s) <span className="text-red-500">*</span>
-    <div className="relative" ref={colorDropdownRef}>
+  <div className="relative" ref={colorDropdownRef}>
+    <div className="flex gap-2 items-center w-full">
+      <button
+        type="button"
+        className="mt-1 w-full border rounded-lg px-3 py-2 text-left bg-white focus:ring-2 focus:ring-cvsu-yellow outline-none flex justify-between items-center"
+        onClick={() => setColorDropdownOpen(v => !v)}
+      >
+        <span className="truncate flex-1">
+          {selectedColors.length > 0
+            ? selectedColors.map(c => c.label).join(', ')
+            : 'Select at least 1 color...'}
+        </span>
+        <span className="ml-2 text-gray-400">{colorDropdownOpen ? '▲' : '▼'}</span>
+      </button>
+      {selectedColors.length > 0 && (
         <button
-            type="button"
-            className="mt-1 w-full border rounded-lg px-3 py-2 text-left bg-white focus:ring-2 focus:ring-cvsu-yellow outline-none flex justify-between items-center"
-            onClick={() => setColorDropdownOpen(v => !v)}
+          type="button"
+          className="ml-2 text-red-500 hover:text-red-500/70 focus:outline-none"
+          tabIndex={-1}
+          aria-label="Clear selected colors"
+          title='Clear selected colors'
+          onClick={e => {
+            e.stopPropagation();
+            setSelectedColors([]);
+          }}
         >
-            <span className="truncate flex-1">
-                {selectedColors.length > 0
-                    ? selectedColors.map(c => c.label).join(', ')
-                    : 'Select at least 1 color...'}
-            </span>
-            {selectedColors.length > 0 && (
-                <button
-                    type="button"
-                    className="ml-2 text-red-500 hover:text-red-500/70 focus:outline-none"
-                    tabIndex={-1}
-                    aria-label="Clear selected colors"
-                    title='Clear selected colors'
-                    onClick={e => {
-                        e.stopPropagation();
-                        setSelectedColors([]);
-                    }}
-                >
-                    ✕
-                </button>
-            )}
-            <span className="ml-2 text-gray-400">{colorDropdownOpen ? '▲' : '▼'}</span>
+          ✕
         </button>
-        {colorDropdownOpen && (
-            <div className="absolute z-50 mt-1 w-full max-h-56 overflow-y-auto bg-white border rounded-lg shadow-lg p-2">
+      )}
+    </div>
+    {colorDropdownOpen && (
+      <div className="absolute z-50 mt-1 w-full max-h-56 overflow-y-auto bg-white border rounded-lg shadow-lg p-2">
                 <input
                     type="text"
                     placeholder="Search colors..."

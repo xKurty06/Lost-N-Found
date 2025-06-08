@@ -3,12 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import * as legalContents from '../../legal/legal-contents';
 
 export default function Page() {
     const getStartedRef = useRef<HTMLDivElement>(null);
     const [showClickMe, setShowClickMe] = useState(false);
     const aboutRef = useRef<HTMLDivElement>(null);
     const [aboutVisible, setAboutVisible] = useState(false);
+    const [legalModalOpen, setLegalModalOpen] = useState(false);
+    const [legalModalTitle, setLegalModalTitle] = useState('');
+    const [legalModalContent, setLegalModalContent] = useState<React.ReactNode>(null);
 
     // Shared function to center the getStarted section
     function scrollToGetStarted() {
@@ -151,6 +155,28 @@ export default function Page() {
         }
     }, []);
 
+    function openLegalModal(type: 'terms' | 'privacy' | 'website' | 'accessibility') {
+        switch (type) {
+            case 'terms':
+                setLegalModalTitle('Terms of Service');
+                setLegalModalContent(legalContents.termsOfService);
+                break;
+            case 'privacy':
+                setLegalModalTitle('Privacy Policy');
+                setLegalModalContent(legalContents.privacyPolicy);
+                break;
+            case 'website':
+                setLegalModalTitle('Website Terms');
+                setLegalModalContent(legalContents.websiteTerms);
+                break;
+            case 'accessibility':
+                setLegalModalTitle('Accessibility Statement');
+                setLegalModalContent(legalContents.accessibilityStatement);
+                break;
+        }
+        setLegalModalOpen(true);
+    }
+
     return (
         <>
             {/* Hero Section with BG image */}
@@ -263,7 +289,7 @@ export default function Page() {
                     </div>
                     <div className="text-green-900 text-base md:text-xl mt-10 leading-relaxed space-y-6 font-sans">
                         <p>
-                            At Lost and Found Hub, we believe that even the smallest acts of honesty and kindness can make a big difference. Founded with the goal of helping students at Cavite State University recover misplaced or forgotten items, our platform serves as a central digital space where the campus community can come together to report lost belongings or turn in found ones.
+                            At Lost and Found Hub, we believe that even the smallest acts of honesty and kindness can make a big difference. Founded with the goal of helping students at Cavite State University Main Campus recover misplaced or forgotten items, our platform serves as a central digital space where the campus community can come together to report lost belongings or turn in found ones.
                         </p>
                         <p>
                             We understand how frustrating it can be to lose something important – whether it’s your student ID, a cherished hoodie, a gadget, or even a single notebook filled with class notes. That’s why we’ve designed this hub to be easy to use, reliable, and student-centered.
@@ -360,17 +386,25 @@ export default function Page() {
             {/* Footer */}
             <footer className="w-full text-xs text-gray-600 text-center py-4 border-t mt-4">
                 <div className="flex flex-wrap justify-center gap-4 mb-2">
-                    <a href="#" className="hover:underline">Website Terms</a>
-                    <a href="#" className="hover:underline">Privacy Policy</a>
-                    <a href="#" className="hover:underline">Accessibility Statement</a>
-                    <a href="#" className="hover:underline">CA Transparency in Supply Chain Act</a>
-                    <a href="#" className="hover:underline">Do not sell my information</a>
-                    <a href="#" className="hover:underline">Warranty</a>
-                    <a href="#" className="hover:underline">Supplier Code of Conduct</a>
+                    <button className="hover:underline bg-transparent border-none p-0 m-0 text-inherit cursor-pointer" onClick={() => openLegalModal('website')}>Website Terms</button>
+                    <button className="hover:underline bg-transparent border-none p-0 m-0 text-inherit cursor-pointer" onClick={() => openLegalModal('privacy')}>Privacy Policy</button>
+                    <button className="hover:underline bg-transparent border-none p-0 m-0 text-inherit cursor-pointer" onClick={() => openLegalModal('terms')}>Terms of Service</button>
+                    <button className="hover:underline bg-transparent border-none p-0 m-0 text-inherit cursor-pointer" onClick={() => openLegalModal('accessibility')}>Accessibility Statement</button>
                 </div>
                 <div>
                     ©2025 Lost and Found. All Rights Reserved
                 </div>
+                {legalModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 relative animate-fadein-up">
+                            <h3 className="text-xl font-bold mb-4 text-green-700 text-left">{legalModalTitle}</h3>
+                            <div className="prose prose-green max-h-96 overflow-y-auto text-gray-800 mb-6 text-left">{legalModalContent}</div>
+                            <div className="flex justify-end gap-2">
+                                <button onClick={() => setLegalModalOpen(false)} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 font-semibold">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </footer>
         </>
     );
