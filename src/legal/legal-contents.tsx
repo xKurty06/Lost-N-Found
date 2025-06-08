@@ -2,7 +2,7 @@ import React from "react";
 
 export const termsOfService = (
   <div>
-    <p><strong>Effective Date: TBA...</strong></p>
+    <p><strong>Effective Date: June 07, 2025</strong></p>
     <p>Welcome to LF Hub, a campus-focused platform designed to help students report and recover lost and found items. By accessing or using this website, you agree to the following terms and conditions. Please read them carefully.</p>
     <ol className="list-decimal ml-6 space-y-2" style={{ listStyleType: 'decimal', paddingLeft: '1.5rem' }}>
       <li>
@@ -11,7 +11,7 @@ export const termsOfService = (
       </li>
       <li>
         <strong>User Responsibilities</strong><br />
-        You are responsible for the accuracy and truthfulness of the information you provide when reporting lost or found items.<br />
+        You are responsible for the accuracy and truthfulness of the information you provide when reporting items.<br />
         Do not post false claims, impersonate others, or attempt to deceive users.<br />
         Items listed as found must be made available for legitimate claims by their rightful owners.
       </li>
@@ -50,23 +50,21 @@ export const termsOfService = (
 
 export const privacyPolicy = (
   <div>
-    <p><strong>Effective Date: TBA...</strong></p>
-    <p>At LF Hub, we value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and safeguard the information you share with us.</p>
+    <p><strong>Effective Date: June 07, 2025</strong></p>
+    <p>At LF Hub, we value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you register, report an item, or claim an item through our platform.</p>
     <ol className="list-decimal ml-6 space-y-2" style={{ listStyleType: 'decimal', paddingLeft: '1.5rem' }}>
       <li>
         <strong>Information We Collect</strong><br />
-        When you use LF Hub, we may collect the following:<br />
-        Your name and email address<br />
-        Your campus ID or student number (if required for verification)<br />
-        Item details (name, description, location, date, image)<br />
-        Optional contact information (e.g., phone number or social media handle)
+        <u>Registration:</u> We collect your name, email address, and campus ID or student number to verify your identity and create your account.<br />
+        <u>Reporting an Item:</u> When you report a lost or found item, we collect item details (name, description, location, date/time, and images) and may request your contact information (e.g., phone number or social media handle) to facilitate communication.<br />
+        <u>Claiming an Item:</u> When you claim an item, we may collect additional information to verify your ownership and facilitate the claim process, including your contact details and any evidence you provide.
       </li>
       <li>
         <strong>How We Use Your Information</strong><br />
-        Your information is used solely for the purpose of:<br />
-        Allowing users to report and search for lost or found items<br />
-        Facilitating communication between users<br />
-        Verifying your identity as part of our campus-based community<br />
+        - To create and manage your account.<br />
+        - To allow users to report, search for, and claim lost or found items.<br />
+        - To facilitate communication between users regarding lost and found items.<br />
+        - To verify your identity and ownership as part of our campus-based community.<br />
         We do not sell, rent, or share your personal information with third parties for marketing purposes.
       </li>
       <li>
@@ -88,9 +86,9 @@ export const privacyPolicy = (
       <li>
         <strong>User Rights</strong><br />
         You have the right to:<br />
-        Access and review your data<br />
-        Correct inaccurate information<br />
-        Request the deletion of your data<br />
+        - Access and review your data<br />
+        - Correct inaccurate information<br />
+        - Request the deletion of your data<br />
         To make a data request, contact us at: [Insert Contact Email]
       </li>
       <li>
@@ -98,5 +96,75 @@ export const privacyPolicy = (
         We may update this Privacy Policy from time to time. Any changes will be posted on this page, and you will be notified of significant updates.
       </li>
     </ol>
+  </div>
+);
+
+export const websiteTerms = (
+  <div>
+    <p><strong>Effective Date: June 07, 2025</strong></p>
+    <h1>Website Terms</h1>
+    <p>Welcome to LF Hub. By accessing or using this website, you agree to comply with the following terms and all applicable laws and regulations. If you do not agree with any of these terms, please do not use the site.</p>
+    <ol className="list-decimal ml-6 space-y-2" style={{ listStyleType: 'decimal', paddingLeft: '1.5rem' }}>
+      <li>
+        <strong>Use of the Website</strong><br />
+        LF Hub is provided for the purpose of reporting, searching, and claiming lost and found items within the Cavite State University community.<br />
+        You agree to use the website only for lawful purposes and in a manner that does not infringe the rights of, restrict, or inhibit anyone else's use of the site.
+      </li>
+      <li>
+        <strong>Intellectual Property</strong><br />
+        All content, trademarks, logos, and images on this website are the property of LF Hub or its licensors and are protected by copyright and other intellectual property laws.<br />
+        You may not copy, reproduce, republish, or distribute any content from this site without prior written permission, except for personal, non-commercial use.
+      </li>
+      <li>
+        <strong>User Content</strong><br />
+        You are responsible for any content you submit, including item reports, images, and messages.<br />
+        Do not submit content that is unlawful, offensive, or infringes on the rights of others.<br />
+        LF Hub reserves the right to remove or edit any content at its discretion.
+      </li>
+      <li>
+        <strong>Links to Other Sites</strong><br />
+        LF Hub may contain links to third-party websites. We are not responsible for the content or privacy practices of those sites.
+      </li>
+      <li>
+        <strong>Disclaimer</strong><br />
+        LF Hub is provided on an "as is" and "as available" basis. We do not guarantee the accuracy, completeness, or reliability of the site or its content.<br />
+        We are not liable for any loss or damage resulting from your use of the website.
+      </li>
+      <li>
+        <strong>Changes to Terms</strong><br />
+        LF Hub may update these Website Terms at any time. Continued use of the site indicates your acceptance of the revised terms.
+      </li>
+      <li>
+        <strong>Contact</strong><br />
+        For questions about these terms, contact us at: <a href="mailto:lfhub.contact@gmail.com">lfhub.contact@gmail.com</a>
+      </li>
+    </ol>
+  </div>
+);
+
+export const accessibilityStatement = (
+  <div>
+    <p><strong>Effective Date: June 07, 2025</strong></p>
+    <h1>Accessibility Statement</h1>
+    <p>LF Hub is committed to ensuring digital accessibility for all users, including people with disabilities. We strive to continually improve the user experience and apply relevant accessibility standards.</p>
+    <h2>Our Commitment</h2>
+    <ul className="list-disc ml-6 space-y-1" style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }}>
+      <li>We aim to make the website accessible and usable for everyone, regardless of technology or ability.</li>
+      <li>The site is designed to be compatible with modern browsers and assistive technologies.</li>
+      <li>We use clear language, high-contrast colors, and scalable text to enhance readability.</li>
+      <li>Navigation is possible using a keyboard, and images include descriptive alt text where appropriate.</li>
+    </ul>
+    <h2>Ongoing Efforts</h2>
+    <ul className="list-disc ml-6 space-y-1" style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }}>
+      <li>We regularly review and update our website to address accessibility issues and improve usability.</li>
+      <li>User feedback is encouraged to help us identify and resolve accessibility barriers.</li>
+    </ul>
+    <h2>Limitations</h2>
+    <ul className="list-disc ml-6 space-y-1" style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }}>
+      <li>While we strive for full accessibility, some content or features may not yet fully meet all accessibility standards.</li>
+      <li>If you encounter any accessibility barriers, please contact us so we can address your concerns.</li>
+    </ul>
+    <h2>Contact</h2>
+    <p>For accessibility-related questions or feedback, contact us at: <a href="mailto:lfhub.contact@gmail.com">lfhub.contact@gmail.com</a></p>
   </div>
 );

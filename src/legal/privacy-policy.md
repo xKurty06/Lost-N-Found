@@ -1,24 +1,19 @@
 # Privacy Policy
 
-_Last updated: May 29, 2025_
+**Effective Date: June 07, 2025**
 
-- [Go back](/README.md)
+At LF Hub, we value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you register, report an item, or claim an item through our platform.
 
-At LF Hub, we value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and safeguard the information you share with us.
-
-## Privacy Policy
 1. **Information We Collect**  
-When you use LF Hub, we may collect the following:  
-Your name and email address  
-Your campus ID or student number (if required for verification)  
-Item details (name, description, location, date, image)  
-Optional contact information (e.g., phone number or social media handle)
+<u>Registration:</u> We collect your name, email address, and campus ID or student number to verify your identity and create your account.  
+<u>Reporting an Item:</u> When you report a lost or found item, we collect item details (name, description, location, date/time, and images) and may request your contact information (e.g., phone number or social media handle) to facilitate communication.  
+<u>Claiming an Item:</u> When you claim an item, we may collect additional information to verify your ownership and facilitate the claim process, including your contact details and any evidence you provide.
 
 2. **How We Use Your Information**  
-Your information is used solely for the purpose of:  
-Allowing users to report and search for lost or found items  
-Facilitating communication between users  
-Verifying your identity as part of our campus-based community  
+- To create and manage your account.  
+- To allow users to report, search for, and claim lost or found items.  
+- To facilitate communication between users regarding lost and found items.  
+- To verify your identity and ownership as part of our campus-based community.  
 We do not sell, rent, or share your personal information with third parties for marketing purposes.
 
 3. **Data Security**  
@@ -35,9 +30,9 @@ LF Hub may contain links to external websites (e.g., campus portals or student s
 
 7. **User Rights**  
 You have the right to:  
-Access and review your data  
-Correct inaccurate information  
-Request the deletion of your data  
+- Access and review your data  
+- Correct inaccurate information  
+- Request the deletion of your data  
 To make a data request, contact us at: [Insert Contact Email]
 
 8. **Policy Updates**  

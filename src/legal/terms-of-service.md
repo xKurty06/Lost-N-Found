@@ -1,17 +1,16 @@
 # Terms of Service
 
-_Last updated: May 29, 2025_
+_Effective Date: June 07, 2025_
 
 - [Go back](/README.md)
 
 Welcome to LF Hub, a campus-focused platform designed to help students report and recover lost and found items. By accessing or using this website, you agree to the following terms and conditions. Please read them carefully.
 
-## Terms
 1. **Eligibility**  
 LF Hub is intended for use by students, faculty, and staff within the campus community. By using the platform, you confirm that you are affiliated with the institution and agree to use the site responsibly.
 
 2. **User Responsibilities**  
-You are responsible for the accuracy and truthfulness of the information you provide when reporting lost or found items.  
+You are responsible for the accuracy and truthfulness of the information you provide when reporting items.  
 Do not post false claims, impersonate others, or attempt to deceive users.  
 Items listed as found must be made available for legitimate claims by their rightful owners.
 
