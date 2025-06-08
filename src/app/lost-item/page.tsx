@@ -7,71 +7,23 @@ import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
 import { usePathname } from 'next/navigation';
 import HandleReport from "@/components/ui/HandleReport";
+import HandleClaim from "@/components/ui/HandleClaim";
+import { createClient } from '@/supabase/clients/client';
 
-const lostItems = [
-	{
-		id: 1,
-		title: 'Wallet',
-		date: 'Today, 7:30am',
-		location: 'Near Bleachers',
-		note: 'Inilaan ko po sa Guard ng Gate 2',
-		color: 'Black',
-		image: '/images/logo.png',
-	},
-	{
-		id: 2,
-		title: 'Aquaflask tumbler',
-		date: 'Yesterday, 1:39pm',
-		location: 'Outside DIT bldg.',
-		note: 'Binigay ko po sa Guard ng Gate 1',
-		color: 'Gray',
-		image: '/images/login-bg.png',
-	},
-	{
-		id: 3,
-		title: 'Cap',
-		date: '2 days ago, 11:27am',
-		location: 'Sa Batibot malapit sa Museum',
-		note: 'Nasa Guard po ng Gate 3',
-		color: 'Brown',
-		image: '/images/cvsu-homebg.jpg',
-	},
-	{
-		id: 4,
-		title: 'Cap',
-		date: '2 days ago, 11:27am',
-		location: 'Sa Batibot malapit sa Museum',
-		note: 'Nasa Guard po ng Gate 3',
-		color: 'Brown',
-		image: '/images/cvsu-homebg.jpg',
-	},
-	{
-		id: 5, // changed from 3 to 5 to ensure uniqueness
-		title: 'Cap',
-		date: '2 days ago, 11:27am',
-		location: 'Sa Batibot malapit sa Museum',
-		note: 'Nasa Guard po ng Gate 3',
-		color: 'Brown',
-		image: '/images/cvsu-homebg.jpg',
-	},
-	{
-		id: 6, // changed from 4 to 6 to ensure uniqueness
-		title: 'Cap',
-		date: '2 days ago, 11:27am',
-		location: 'Sa Batibot malapit sa Museum',
-		note: 'Nasa Guard po ng Gate 3',
-		color: 'Brown',
-		image: '/images/cvsu-homebg.jpg',
-	},
-];
 export default function LostItemPage() {
 	const pathname = usePathname();
 	const [search, setSearch] = useState("");
 	const [pendingSearch, setPendingSearch] = useState("");
 	const [reportOpen, setReportOpen] = useState(false);
-	// --- New: Sort/Filter System ---
+	const [claimOpen, setClaimOpen] = useState(false);
+	const [claimItem, setClaimItem] = useState<any>(null);
 	const [sort, setSort] = useState("recent");
 	const [showSortOptions, setShowSortOptions] = useState(false);
+	const [items, setItems] = useState<any[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [copiedItemNumber, setCopiedItemNumber] = useState<string | null>(null);
+	const sortDropdownRef = useRef<HTMLDivElement>(null);
+
 	const sortOptions = [
 		{ value: "recent", label: "Most Recent" },
 		{ value: "oldest", label: "Oldest" },
@@ -79,17 +31,51 @@ export default function LostItemPage() {
 		{ value: "color", label: "Color" }
 	];
 
-	function sortItems(items: typeof lostItems, sort: string) {
+	useEffect(() => {
+		async function fetchItems() {
+			setLoading(true);
+			const supabase = createClient();
+			const { data, error } = await supabase
+				.from('items')
+				.select('*, users: user_id (username)')
+				.order('date_time_found', { ascending: false });
+			if (!error && data) {
+				setItems(data);
+			}
+			setLoading(false);
+		}
+		fetchItems();
+	}, []);
+
+	useEffect(() => {
+		if (!showSortOptions) return;
+		function handleClickOutside(e: MouseEvent) {
+			if (sortDropdownRef.current && !(sortDropdownRef.current as any).contains(e.target)) {
+				setShowSortOptions(false);
+			}
+		}
+		function handleEscape(e: KeyboardEvent) {
+			if (e.key === 'Escape') setShowSortOptions(false);
+		}
+		document.addEventListener('mousedown', handleClickOutside);
+		document.addEventListener('keydown', handleEscape);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+			document.removeEventListener('keydown', handleEscape);
+		};
+	}, [showSortOptions]);
+
+	function sortItems(items: any[], sort: string) {
 		switch (sort) {
 			case "oldest":
-				return [...items].sort((a, b) => a.id - b.id);
+				return [...items].sort((a, b) => new Date(a.date_time_found).getTime() - new Date(b.date_time_found).getTime());
 			case "title":
 				return [...items].sort((a, b) => a.title.localeCompare(b.title));
 			case "color":
-				return [...items].sort((a, b) => a.color.localeCompare(b.color));
+				return [...items].sort((a, b) => (a.color?.[0] || '').localeCompare(b.color?.[0] || ''));
 			case "recent":
 			default:
-				return [...items].sort((a, b) => b.id - a.id);
+				return [...items].sort((a, b) => new Date(b.date_time_found).getTime() - new Date(a.date_time_found).getTime());
 		}
 	}
 
@@ -98,16 +84,42 @@ export default function LostItemPage() {
 		setShowSortOptions(false);
 	}
 
-	// Filter and sort items
 	const filteredItems = useMemo(() => {
-		let items = lostItems.filter(item =>
-			item.title.toLowerCase().includes(search.toLowerCase()) ||
-			item.location.toLowerCase().includes(search.toLowerCase()) ||
-			item.note.toLowerCase().includes(search.toLowerCase()) ||
-			item.color.toLowerCase().includes(search.toLowerCase())
+		let filtered = items.filter(item =>
+			item.status === 'not_claimed' && (
+				item.title?.toLowerCase().includes(search.toLowerCase()) ||
+				item.location?.toLowerCase().includes(search.toLowerCase()) ||
+				item.description?.toLowerCase().includes(search.toLowerCase()) ||
+				(item.color && Array.isArray(item.color) ? item.color.join(', ').toLowerCase().includes(search.toLowerCase()) : (item.color || '').toLowerCase().includes(search.toLowerCase()))
+			)
 		);
-		return sortItems(items, sort);
-	}, [search, sort, lostItems]);
+		return sortItems(filtered, sort);
+	}, [search, sort, items]);
+
+	// Add a refreshItems function to fetch items again without reloading the browser
+	const refreshItems = async () => {
+		setLoading(true);
+		const supabase = createClient();
+		const { data, error } = await supabase
+			.from('items')
+			.select('*, users: user_id (username)')
+			.order('date_time_found', { ascending: false });
+		if (!error && data) {
+			setItems(data);
+		}
+		setLoading(false);
+	};
+
+	// Helper to format date in UTC+8 (Philippines timezone)
+	function formatPHDate(dateString: string) {
+		if (!dateString) return '';
+		const date = new Date(dateString);
+		return date.toLocaleString('en-PH', {
+			year: 'numeric', month: 'short', day: 'numeric',
+			hour: '2-digit', minute: '2-digit', hour12: true,
+			timeZone: 'Asia/Manila'
+		});
+	}
 
 	return (
 		<div className="min-h-screen w-full flex flex-col">
@@ -187,12 +199,14 @@ export default function LostItemPage() {
 									)}
 								</button>
 							</div>
-							<div className="flex items-center relative flex-shrink-0 bg-white rounded-full">
+							<div className="flex items-center relative flex-shrink-0 bg-white rounded-full" ref={sortDropdownRef}>
 								<button
 									type="button"
 									className="flex items-center justify-center w-10 h-10 rounded-full bg-white hover:bg-gray-200 transition border-none outline-none"
 									aria-label="Sort options"
 									onClick={() => setShowSortOptions(v => !v)}
+									aria-haspopup="listbox"
+									aria-expanded={showSortOptions}
 								>
 									<svg className="w-6 h-6 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
 										<path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M6 12h12M9 17h6" />
@@ -242,7 +256,7 @@ export default function LostItemPage() {
 									aria-label="Refresh items"
 									title="Refresh items"
 									style={{ minWidth: '2.5rem', minHeight: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-									onClick={() => window.location.reload()}
+									onClick={refreshItems}
 								>
 									<img src="/icons/refresh.svg" alt="Refresh" className="w-6 h-6" style={{ filter: 'invert(36%) sepia(94%) saturate(453%) hue-rotate(88deg) brightness(70%) contrast(91%)', minWidth: '1.5rem', minHeight: '1.5rem' }} />
 								</button>
@@ -333,7 +347,9 @@ export default function LostItemPage() {
 				{/* Update grid container for perfect alignment with navbar and decrease gap */}
 				{/* --- Grid container: truly edge-to-edge, no horizontal padding, minimal gap --- */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-4 max-w-5xl mx-0 px-0 pb-8">
-					{filteredItems.length === 0 ? (
+					{loading ? (
+						<div className="col-span-full text-center text-white py-12 font-semibold text-lg drop-shadow-md">Loading items...</div>
+					) : filteredItems.length === 0 ? (
 						<div className="col-span-full text-center text-white py-12 font-semibold text-lg drop-shadow-md">No items found.</div>
 					) : (
 						filteredItems.map(item => (
@@ -345,7 +361,7 @@ export default function LostItemPage() {
 								<div className="w-full h-40 relative mb-2 rounded-xl overflow-hidden">
 									<Zoom>
 										<img
-											src={item.image}
+											src={item.image_url || '/images/logo.png'}
 											alt={item.title}
 											className="object-cover w-full h-full aspect-square bg-white"
 											style={{ cursor: 'pointer', objectFit: 'cover', width: '100%', height: '100%', background: 'white' }}
@@ -365,30 +381,84 @@ export default function LostItemPage() {
 										</svg>
 									</button>
 								</div>
-								<div className="w-full flex flex-col gap-1">
-									<h2 className="font-bold text-lg mb-1 truncate flex items-center gap-2" title={item.title}>
-										{item.title}
-									</h2>
+								<div className="w-full flex flex-col gap-0.5 mb-2">
+									<div className="flex items-center justify-between mb-1">
+										<h2 className="font-bold text-lg truncate flex items-center gap-2" title={item.title}>
+											{item.title}
+										</h2>
+										{typeof item.item_number !== 'undefined' && (
+											<span className="flex items-center gap-1 ml-2 whitespace-nowrap">
+												<span className="text-xs font-mono text-green-700 font-bold">#{String(item.item_number).padStart(6, '0')}</span>
+												<button
+													type="button"
+													className="ml-1 p-1 rounded hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-400"
+													title="Copy item number"
+													aria-label="Copy item number"
+													onClick={() => {
+														const formatted = `#${String(item.item_number).padStart(6, '0')}`;
+														navigator.clipboard.writeText(formatted);
+														setCopiedItemNumber(formatted);
+														setTimeout(() => setCopiedItemNumber(null), 3000);
+													}}
+												>
+													{copiedItemNumber === `#${String(item.item_number).padStart(6, '0')}` ? (
+														<img src="/icons/check_icon.svg" alt="Copied" className="w-4 h-4 inline" style={{ filter: 'invert(36%) sepia(94%) saturate(453%) hue-rotate(88deg) brightness(70%) contrast(91%)' }} />
+													) : (
+														<img src="/icons/content_copy.svg" alt="Copy" className="w-4 h-4 inline" style={{ filter: 'invert(36%) sepia(94%) saturate(453%) hue-rotate(88deg) brightness(70%) contrast(91%)' }} />
+													)}
+												</button>
+											</span>
+										)}
+									</div>
+									<p className="text-xs text-gray-600 mb-1">
+										Reported by: <span className="font-semibold">{item.users?.username || 'Unknown'}</span>
+									</p>
 									<p className="text-xs text-gray-700 flex items-center gap-1">
-										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-										{item.date}
+										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+										<span className="text-green-700 font-semibold">Found:</span> {item.date_time_found ? formatPHDate(item.date_time_found) : ''}
 									</p>
 									<p className="text-xs flex items-center gap-1">
-										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 12.414a4 4 0 10-1.414 1.414l4.243 4.243a1 1 0 001.414-1.414z" /></svg>
+										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 12.414a4 4 0 10-1.414 1.414l4.243 4.243a1 1 0 001.414-1.414z" /></svg>
 										<span className="text-green-700 font-semibold">Location:</span> {item.location}
 									</p>
 									<p className="text-xs flex items-center gap-1">
-										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 7.165 6 9.388 6 12v2.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-										<span className="text-green-700 font-semibold">Note:</span> {item.note}
+										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 7.165 6 9.388 6 12v2.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+										<span className="text-green-700 font-semibold">Description:</span> {item.description}
 									</p>
 									<p className="text-xs flex items-center gap-1">
-										<span className="inline-block w-3 h-3 rounded-full border border-green-700 mr-1" style={{ background: item.color.toLowerCase() }}></span>
-										<span className="text-green-700 font-semibold">Color:</span> {item.color}
+										<span className="inline-block w-3 h-3 rounded-full border border-green-700 mr-1" style={{ background: Array.isArray(item.color) ? (item.color[0]?.toLowerCase() || '') : (item.color?.toLowerCase() || '') }}></span>
+										<span className="text-green-700 font-semibold">Color:</span> {Array.isArray(item.color) ? item.color.join(', ') : item.color}
 									</p>
 								</div>
-								<button className="mt-auto bg-green-700 text-white rounded-lg px-5 py-1.5 font-semibold hover:bg-cvsu-yellow hover:text-green-900 transition text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-									Claim Item
-								</button>
+								<div className="flex w-full items-center mt-auto">
+									<div className="flex-1 flex justify-center gap-1">
+										<button
+											className="bg-green-700 text-white rounded-lg px-5 py-1.5 font-semibold hover:bg-cvsu-yellow hover:text-green-900 transition text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+											onClick={() => { setClaimOpen(true); setClaimItem(item); }}
+										>
+											Claim Item
+										</button>
+										<button
+											type="button"
+											className="bg-white border border-green-700 text-green-700 rounded-lg px-1 py-1 font-semibold hover:bg-green-50 hover:text-green-900 transition text-sm focus:outline-none focus:ring-2 focus:ring-green-400 flex items-center ml-0"
+											title="Copy item link"
+											aria-label="Copy item link"
+											onClick={() => {
+												const url = `${window.location.origin}/lost-item?item=${item.item_number}`;
+												navigator.clipboard.writeText(url);
+												setCopiedItemNumber(url);
+												setTimeout(() => setCopiedItemNumber(null), 3000);
+											}}
+										>
+											{copiedItemNumber === `${window.location.origin}/lost-item?item=${item.item_number}` ? (
+												<img src="/icons/check_icon.svg" alt="Copied" className="w-5 h-5 inline" style={{ filter: 'invert(36%) sepia(94%) saturate(453%) hue-rotate(88deg) brightness(70%) contrast(91%)' }} />
+											) : (
+												<img src="/icons/copy_link.png" alt="Copy link" className="w-5 h-5 inline" style={{ filter: 'invert(36%) sepia(94%) saturate(453%) hue-rotate(88deg) brightness(70%) contrast(91%)' }} />
+											)}
+											<span className="sr-only">Copy link</span>
+										</button>
+									</div>
+								</div>
 							</div>
 						))
 					)}
@@ -401,6 +471,7 @@ export default function LostItemPage() {
 					<span className='pb-2'>+</span>
 				</button>
 				<HandleReport open={reportOpen} onClose={() => setReportOpen(false)} />
+				<HandleClaim open={claimOpen} onClose={() => setClaimOpen(false)} onSubmit={() => setClaimOpen(false)} />
 				<div className="h-16 sm:h-24" /> {/* Spacer at the bottom for extra space below content and FAB */}
 			</div>
 			{/* Custom styles for react-medium-image-zoom modal */}

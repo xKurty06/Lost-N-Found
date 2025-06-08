@@ -3,6 +3,7 @@ import { usePathname } from 'next/navigation';
 import Navbar from "./navbar";
 import "./globals.css";
 import ToastProvider from '../components/ui/ToastProvider';
+import CookieConsent from '../components/ui/CookieConsent';
 
 export default function RootLayout({
     children,
@@ -23,6 +24,7 @@ export default function RootLayout({
                             {children}
                         </main>
                     </div>
+                    <CookieConsent />
                 </ToastProvider>
             </body>
         </html>

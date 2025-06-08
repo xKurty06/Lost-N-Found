@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { createClient } from '../../supabase/clients/client';
 import bcrypt from 'bcryptjs';
 import { useToast } from '../../components/ui/ToastProvider';
+import Cookies from 'js-cookie';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
@@ -54,7 +55,9 @@ function LoginForm() {
       }
       showToast('Login successful!', 'success');
       setLoading(false);
-      // TODO: Set session/cookie or redirect as needed
+      // Set cookie for session (username and user id)
+      Cookies.set('lfhub_user', JSON.stringify({ id: user.id, username }), { expires: 7 });
+      window.location.href = '/home';
     } catch (err) {
       showToast('Unexpected error. Please try again.', 'error');
       setLoading(false);
