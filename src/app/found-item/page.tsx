@@ -1,42 +1,56 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import Image from "next/image";
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
+import { usePathname } from 'next/navigation';
 import HandleReport from "@/components/ui/HandleReport";
 import { createClient } from '@/supabase/clients/client';
 import ReactDOM from 'react-dom';
 import { getUserFromCookie } from '@/utils/auth';
 import { useToast } from '@/components/ui/ToastProvider';
 
+interface Item {
+	id: number;
+	title: string;
+	description: string;
+	color: string | string[];
+	date_time_found: string;
+	location: string;
+	image_url?: string;
+	item_number?: number;
+	status: string;
+	users?: { username?: string };
+}
+
 export default function FoundItemPage() {
 	const pathname = usePathname();
 	const [search, setSearch] = useState("");
 	const [pendingSearch, setPendingSearch] = useState("");
-	const [searchLoading, setSearchLoading] = useState(false);
 	const [reportOpen, setReportOpen] = useState(false);
+	const [claimOpen, setClaimOpen] = useState(false);
+	const [claimItem, setClaimItem] = useState<Item | null>(null);
 	const [sort, setSort] = useState("recent");
 	const [showSortOptions, setShowSortOptions] = useState(false);
-	const [items, setItems] = useState<any[]>([]);
+	const [items, setItems] = useState<Item[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [copiedItemNumber, setCopiedItemNumber] = useState<string | null>(null);
-	const { showToast } = useToast();
-	const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 	const [showScrollButton, setShowScrollButton] = useState(false);
 	const [showClaimsLink, setShowClaimsLink] = useState(false);
-	const [user, setUser] = useState<any>(null);
+	const sortDropdownRef = useRef(null);
+	const { showToast } = useToast();
+	const [user, setUser] = useState(null);
 
 	const sortOptions = [
 		{ value: "recent", label: "Most Recent" },
 		{ value: "oldest", label: "Oldest" },
 		{ value: "title", label: "Title (A-Z)" },
-		{ value: "color", label: "Color" }
+		{ value: "color", label: "Color" },
 	];
 
-	React.useEffect(() => {
+	useEffect(() => {
 		async function fetchItems() {
 			setLoading(true);
 			const supabase = createClient();
@@ -52,212 +66,19 @@ export default function FoundItemPage() {
 		fetchItems();
 	}, []);
 
-	// Add a refreshItems function to fetch items again without reloading the browser
-	const refreshItems = async () => {
-		setLoading(true);
-		const supabase = createClient();
-		const { data, error } = await supabase
-			.from('items')
-			.select('*, users: user_id (username)')
-			.order('date_time_found', { ascending: false });
-		if (!error && data) {
-			setItems(data);
-		}
-		setLoading(false);
-	};
-
-	function sortItems(items: any[], sort: string) {
-		switch (sort) {
-			case "oldest":
-				return [...items].sort((a, b) => new Date(a.date_time_found).getTime() - new Date(b.date_time_found).getTime());
-			case "title":
-				return [...items].sort((a, b) => a.title.localeCompare(b.title));
-			case "color":
-				return [...items].sort((a, b) => {
-					const colorA = Array.isArray(a.color) ? (a.color[0] || '') : (a.color || '');
-					const colorB = Array.isArray(b.color) ? (b.color[0] || '') : (b.color || '');
-					return colorA.localeCompare(colorB);
-				});
-			case "recent":
-			default:
-				return [...items].sort((a, b) => new Date(b.date_time_found).getTime() - new Date(a.date_time_found).getTime());
-		}
-	}
-
-	const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+	useEffect(() => {
+		setUser(getUserFromCookie());
+	}, []);
 
 	function handleSortSelect(option: string) {
-		console.log('Selected sort option:', option); // Debugging log
 		setSort(option);
 		setShowSortOptions(false);
-		forceUpdate(); // Force re-render to ensure UI updates
-	}
-
-	const filteredItems = useMemo(() => {
-		const filtered = items.filter(item => {
-			const status = item.status || '';
-			return status === 'claimed' || status === '';
-		});
-		const searchTerm = search.trim().toLowerCase();
-		const searched = !searchTerm ? filtered : filtered.filter(item => {
-			const inTitle = item.title?.toLowerCase().includes(searchTerm);
-			const inDesc = item.description?.toLowerCase().includes(searchTerm);
-			const inLoc = item.location?.toLowerCase().includes(searchTerm);
-			const inColor = Array.isArray(item.color)
-				? item.color.some((c: string) => c?.toLowerCase().includes(searchTerm))
-				: item.color?.toLowerCase().includes(searchTerm);
-			return inTitle || inDesc || inLoc || inColor;
-		});
-		return sortItems(searched, sort);
-	}, [search, sort, items]);
-
-	const sortDropdownRef = React.useRef<HTMLDivElement>(null);
-
-	React.useEffect(() => {
-		if (!showSortOptions) return;
-		function handleClickOutside(e: MouseEvent) {
-			if (sortDropdownRef.current && !(sortDropdownRef.current as any).contains(e.target)) {
-				setShowSortOptions(false);
-			}
-		}
-		function handleEscape(e: KeyboardEvent) {
-			if (e.key === 'Escape') setShowSortOptions(false);
-		}
-		document.addEventListener('mousedown', handleClickOutside);
-		document.addEventListener('keydown', handleEscape);
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-			document.removeEventListener('keydown', handleEscape);
-		};
-	}, [showSortOptions]);
-
-	// Helper to format date in UTC+8 (Philippines timezone)
-	function formatPHDate(dateString: string) {
-		if (!dateString) return '';
-		const date = new Date(dateString);
-		return date.toLocaleString('en-PH', {
-			year: 'numeric', month: 'short', day: 'numeric',
-			hour: '2-digit', minute: '2-digit', hour12: true,
-			timeZone: 'Asia/Manila'
-		});
-	}
-
-	function DescriptionWithPopover({ description }: { description: string }) {
-		const [open, setOpen] = useState(false);
-		const spanRef = useRef<HTMLSpanElement>(null);
-		const popoverRef = useRef<HTMLDivElement>(null);
-		const buttonRef = useRef<HTMLButtonElement>(null);
-		const [truncated, setTruncated] = useState(false);
-		const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
-
-		useEffect(() => {
-			function recalc() {
-				if (spanRef.current) {
-					setTruncated(spanRef.current.scrollWidth > spanRef.current.clientWidth);
-				}
-			}
-			recalc();
-			window.addEventListener('resize', recalc);
-			window.addEventListener('orientationchange', recalc);
-			return () => {
-				window.removeEventListener('resize', recalc);
-				window.removeEventListener('orientationchange', recalc);
-			};
-		}, [description]);
-
-		// Position popover absolutely near the button using a portal
-		useEffect(() => {
-			if (open && buttonRef.current) {
-				const rect = buttonRef.current.getBoundingClientRect();
-				const popoverWidth = 320; // maxWidth
-				const minWidth = 220;
-				const viewportWidth = window.innerWidth;
-				let left = rect.left + window.scrollX + rect.width / 2 - popoverWidth / 2;
-				// Clamp so popover stays within viewport
-				if (left < 8) left = 8;
-				if (left + popoverWidth > viewportWidth - 8) left = viewportWidth - popoverWidth - 8;
-				setPopoverStyle({
-					position: 'absolute',
-					left,
-					top: rect.bottom + 6 + window.scrollY, // 6px gap
-					zIndex: 1000,
-					minWidth,
-					maxWidth: popoverWidth,
-				});
-			}
-		}, [open]);
-
-		// Close popover on click outside
-		useEffect(() => {
-			if (!open) return;
-			function handleClick(e: MouseEvent) {
-				if (
-					popoverRef.current &&
-					!popoverRef.current.contains(e.target as Node) &&
-					buttonRef.current &&
-					!buttonRef.current.contains(e.target as Node)
-				) {
-					setOpen(false);
-				}
-			}
-			document.addEventListener('mousedown', handleClick);
-			return () => {
-				document.removeEventListener('mousedown', handleClick);
-			};
-		}, [open]);
-
-		let portal = null;
-		if (open && typeof window !== 'undefined') {
-			portal = ReactDOM.createPortal(
-				<div
-					ref={popoverRef}
-					className="bg-white rounded-xl shadow-2xl border border-green-200 p-4 animate-fadein-up"
-					tabIndex={-1}
-					role="dialog"
-					style={popoverStyle}
-				>
-					<h3 className="text-xs font-bold mb-2 text-green-700">Full Description</h3>
-					<div className="text-xs prose max-h-48 overflow-y-auto text-gray-800 mb-2 whitespace-pre-line break-words">{description}</div>
-					<div className="flex justify-end">
-						<button onClick={() => setOpen(false)} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 font-semibold text-xs">Close</button>
-					</div>
-				</div>,
-				document.body
-			);
-		}
-		return (
-			<span className="text-xs flex items-center gap-1 relative">
-				{/* Description icon (calendar-like, same as other fields) */}
-				<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-				<span className="text-green-700 font-semibold text-xs">Description:</span>{' '}
-				<span
-					className="break-words text-xs max-w-[130px] inline-block align-bottom truncate overflow-hidden whitespace-nowrap"
-					ref={spanRef}
-					title={description}
-					style={{ userSelect: 'text' }}
-				>
-					{description}
-				</span>
-				{truncated && (
-					<button
-						className="text-cvsu-yellow underline ml-1 text-xs"
-						style={{ paddingLeft: 0 }}
-						onClick={() => setOpen(v => !v)}
-						type="button"
-						ref={buttonRef}
-						aria-haspopup="dialog"
-						aria-expanded={open}
-					>
-						See more
-					</button>
-				)}
-				{portal}
-			</span>
-		);
 	}
 
 	// --- SEARCH LOGIC ---
 	// Debounced live search with loading effect
+	const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+	const [searchLoading, setSearchLoading] = useState(false);
 	useEffect(() => {
 		if (pendingSearch !== search) {
 			setSearchLoading(true);
@@ -271,36 +92,6 @@ export default function FoundItemPage() {
 			if (searchTimeout.current) clearTimeout(searchTimeout.current);
 		};
 	}, [pendingSearch]);
-
-	useEffect(() => {
-		if (searchLoading) {
-			setLoading(true);
-			// Simulate fetch delay (5 seconds)
-			const timeout = setTimeout(() => {
-				setLoading(false);
-			}, 5000);
-			return () => clearTimeout(timeout);
-		} else {
-			setLoading(false);
-		}
-	}, [searchLoading]);
-
-	// When clearing search, stop loading and clear timeout
-	useEffect(() => {
-		if (pendingSearch === "") {
-			setSearch("");
-			setSearchLoading(false);
-			setLoading(false);
-			if (searchTimeout.current) {
-				clearTimeout(searchTimeout.current);
-			}
-		}
-	}, [pendingSearch]);
-
-	// Show loading spinner when switching between lost/found
-	useEffect(() => {
-		setLoading(true);
-	}, [pathname]);
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -345,9 +136,178 @@ export default function FoundItemPage() {
 		checkClaimsVisibility();
 	}, []);
 
-	useEffect(() => {
-		setUser(getUserFromCookie());
-	}, []);
+	// Remove useMemo for filteredItems
+	// Add a function to get filtered and sorted items
+	function getFilteredItems() {
+		// Filter by status first
+		const notClaimedItems = items.filter(item => item.status === 'claimed');
+		const searchTerm = search.trim().toLowerCase();
+		let searched = notClaimedItems;
+		if (searchTerm) {
+			searched = notClaimedItems.filter(item => {
+				const inTitle = item.title?.toLowerCase().includes(searchTerm);
+				const inDesc = item.description?.toLowerCase().includes(searchTerm);
+				const inLoc = item.location?.toLowerCase().includes(searchTerm);
+				const inColor = Array.isArray(item.color)
+					? item.color.some((c: string) => c?.toLowerCase().includes(searchTerm))
+					: item.color?.toLowerCase().includes(searchTerm);
+				return inTitle || inDesc || inLoc || inColor;
+			});
+		}
+		// Sort
+		return [...searched].sort((a, b) => {
+			switch (sort) {
+				case 'oldest':
+					return new Date(a.date_time_found || 0).getTime() - new Date(b.date_time_found || 0).getTime();
+				case 'title':
+					return (a.title || '').localeCompare(b.title || '');
+				case 'color': {
+					const colorA = Array.isArray(a.color) ? (a.color[0] || '') : (a.color || '');
+					const colorB = Array.isArray(b.color) ? (b.color[0] || '') : (b.color || '');
+					return colorA.localeCompare(colorB);
+				}
+				case 'recent':
+				default:
+					return new Date(b.date_time_found || 0).getTime() - new Date(a.date_time_found || 0).getTime();
+			}
+		});
+	}
+
+	// Helper to format date in UTC+8 (Philippines timezone)
+	function formatPHDate(dateString: string) {
+		if (!dateString) return '';
+		const date = new Date(dateString);
+		return date.toLocaleString('en-PH', {
+			year: 'numeric', month: 'short', day: 'numeric',
+			hour: '2-digit', minute: '2-digit', hour12: true,
+			timeZone: 'Asia/Manila'
+		});
+	}
+
+	// DescriptionWithPopover component
+	function DescriptionWithPopover({ description }: { description: string }) {
+		const [open, setOpen] = useState(false);
+		const spanRef = useRef<HTMLSpanElement>(null);
+		const popoverRef = useRef<HTMLDivElement>(null);
+		const buttonRef = useRef<HTMLButtonElement>(null);
+		const [truncated, setTruncated] = useState(false);
+		const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
+
+		useEffect(() => {
+			function recalc() {
+				if (spanRef.current) {
+					setTruncated(spanRef.current.scrollWidth > spanRef.current.clientWidth);
+				}
+			}
+			recalc();
+			window.addEventListener('resize', recalc);
+			window.addEventListener('orientationchange', recalc);
+			return () => {
+				window.removeEventListener('resize', recalc);
+				window.removeEventListener('orientationchange', recalc);
+			};
+		}, [description]);
+
+		useEffect(() => {
+			if (open && buttonRef.current) {
+				const rect = buttonRef.current.getBoundingClientRect();
+				const popoverWidth = 320;
+				const minWidth = 220;
+				const viewportWidth = window.innerWidth;
+				let left = rect.left + window.scrollX + rect.width / 2 - popoverWidth / 2;
+				if (left < 8) left = 8;
+				if (left + popoverWidth > viewportWidth - 8) left = viewportWidth - popoverWidth - 8;
+				setPopoverStyle({
+					position: 'absolute',
+					left,
+					top: rect.bottom + 6 + window.scrollY,
+					zIndex: 1000,
+					minWidth,
+					maxWidth: popoverWidth,
+				});
+			}
+		}, [open]);
+
+		useEffect(() => {
+			if (!open) return;
+			function handleClick(e: MouseEvent) {
+				if (
+					popoverRef.current &&
+					!popoverRef.current.contains(e.target as Node) &&
+					buttonRef.current &&
+					!buttonRef.current.contains(e.target as Node)
+				) {
+					setOpen(false);
+				}
+			}
+			document.addEventListener('mousedown', handleClick);
+			return () => {
+				document.removeEventListener('mousedown', handleClick);
+			};
+		}, [open]);
+
+		let portal = null;
+		if (open && typeof window !== 'undefined') {
+			portal = ReactDOM.createPortal(
+				<div
+					ref={popoverRef}
+					className="bg-white rounded-xl shadow-2xl border border-green-200 p-4 animate-fadein-up"
+					tabIndex={-1}
+					role="dialog"
+					style={popoverStyle}
+				>
+					<h3 className="text-xs font-bold mb-2 text-green-700">Full Description</h3>
+					<div className="text-xs prose max-h-48 overflow-y-auto text-gray-800 mb-2 whitespace-pre-line break-words">{description}</div>
+					<div className="flex justify-end">
+						<button onClick={() => setOpen(false)} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 font-semibold text-xs">Close</button>
+					</div>
+				</div>,
+				document.body
+			);
+		}
+		return (
+			<span className="text-xs flex items-center gap-1 relative">
+				<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+				<span className="text-green-700 font-semibold text-xs">Description:</span>{' '}
+				<span
+					className="break-words text-xs max-w-[135px] inline-block align-bottom truncate overflow-hidden whitespace-nowrap"
+					ref={spanRef}
+					title={description}
+					style={{ userSelect: 'text' }}
+				>
+					{description}
+				</span>
+				{truncated && (
+					<button
+						className="text-cvsu-yellow underline ml-1 text-xs"
+						style={{ paddingLeft: 0 }}
+						onClick={() => setOpen(v => !v)}
+						type="button"
+						ref={buttonRef}
+						aria-haspopup="dialog"
+						aria-expanded={open}
+					>
+						See more
+					</button>
+				)}
+				{portal}
+			</span>
+		);
+	}
+
+	// Add a refreshItems function to fetch items again without reloading the browser
+	const refreshItems = async () => {
+		setLoading(true);
+		const supabase = createClient();
+		const { data, error } = await supabase
+			.from('items')
+			.select('*, users: user_id (username)')
+			.order('date_time_found', { ascending: false });
+		if (!error && data) {
+			setItems(data);
+		}
+		setLoading(false);
+	};
 
 	return (
 		<div className="min-h-screen w-full flex flex-col">
@@ -506,14 +466,8 @@ export default function FoundItemPage() {
 										placeholder="Search"
 										value={pendingSearch}
 										onChange={e => {
-											const value = e.target.value;
-											setPendingSearch(value);
-											setSearchLoading(true);
-											if (searchTimeout.current) clearTimeout(searchTimeout.current);
-											searchTimeout.current = setTimeout(() => {
-												setSearch(value);
-												setSearchLoading(false);
-											}, 300);
+											setPendingSearch(e.target.value);
+											if (search !== "") setSearch(""); // Reset search if user starts typing after search is set
 										}}
 										className="rounded-full border border-green-900 px-3 py-1.5 w-full min-w-0 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-700 hover:border-green-700 transition text-gray-800 placeholder:text-green-900 pr-12 ml-20"
 										aria-label="Search found items"
@@ -587,6 +541,7 @@ export default function FoundItemPage() {
 						</div>
 					</div>
 				</div>
+				{/* Update grid container for perfect alignment with navbar and decrease gap */}
 				{/* --- Grid container: truly edge-to-edge, no horizontal padding, minimal gap --- */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-3 gap-y-5 max-w-6xl mx-0 px-0 pb-8">
 					{loading ? (
@@ -594,10 +549,10 @@ export default function FoundItemPage() {
 							<div className="lds-dual-ring" aria-label="Loading"></div>
 							<span className="mt-4">Loading items...</span>
 						</div>
-					) : filteredItems.length === 0 ? (
+					) : getFilteredItems().length === 0 ? (
 						<div className="col-span-full text-center text-white py-12 font-semibold text-lg drop-shadow-md">No items found.</div>
 					) : (
-						filteredItems.map(item => (
+						getFilteredItems().map(item => (
 							<div
 								key={item.id}
 								className="bg-white/95 rounded-2xl shadow-lg p-3 flex flex-col items-center border-4 border-green-700 transition-transform hover:scale-[1.025] hover:shadow-xl focus-within:shadow-xl outline-none"
@@ -660,7 +615,7 @@ export default function FoundItemPage() {
 									</p>
 									<p className="text-xs text-gray-700 flex items-center gap-1">
 										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-										<span className="text-green-700 font-semibold">Found:</span>{item.date_time_found ? formatPHDate(item.date_time_found) : ''}
+										<span className="text-green-700 font-semibold">Found:</span> {item.date_time_found ? formatPHDate(item.date_time_found) : ''}
 									</p>
 									<p className="text-xs flex items-center gap-1">
 										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 12.414a4 4 0 10-1.414 1.414l4.243 4.243a1 1 0 001.414-1.414z" /></svg>
@@ -675,8 +630,8 @@ export default function FoundItemPage() {
 								<div className="flex w-full items-center mt-auto">
 									<div className="flex-1 flex justify-center gap-1">
 										<button
-											className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-5 py-1.5 font-semibold cursor-not-allowed opacity-60 text-sm"
 											disabled
+											className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-5 py-1.5 font-semibold cursor-not-allowed opacity-60 text-sm"
 										>
 											Claimed
 										</button>
@@ -692,7 +647,11 @@ export default function FoundItemPage() {
 												setTimeout(() => setCopiedItemNumber(null), 3000);
 											}}
 										>
-											<img src="/icons/copy_link.png" alt="Copy link" className="w-5 h-5 inline" style={{ filter: 'invert(36%) sepia(94%) saturate(453%) hue-rotate(88deg) brightness(70%) contrast(91%)' }} />
+											{copiedItemNumber === `${window.location.origin}/found-item?item=${item.item_number}` ? (
+												<img src="/icons/check_icon.svg" alt="Copied" className="w-5 h-5 inline" style={{ filter: 'invert(36%) sepia(94%) saturate(453%) hue-rotate(88deg) brightness(70%) contrast(91%)' }} />
+											) : (
+												<img src="/icons/copy_link.png" alt="Copy link" className="w-5 h-5 inline" style={{ filter: 'invert(36%) sepia(94%) saturate(453%) hue-rotate(88deg) brightness(70%) contrast(91%)' }} />
+											)}
 											<span className="sr-only">Copy link</span>
 										</button>
 									</div>
@@ -715,23 +674,25 @@ export default function FoundItemPage() {
 				>
 					<span className='pb-2'>+</span>
 				</button>
-				<HandleReport open={reportOpen} onClose={() => setReportOpen(false)} />
+				<div style={{ display: reportOpen ? 'block' : 'none' }}>
+				  <HandleReport open={true} onClose={() => setReportOpen(false)} />
+				</div>
 				<div className="h-16 sm:h-24" /> {/* Spacer at the bottom for extra space below content and FAB */}
-				{/* Custom styles for react-medium-image-zoom modal */}
-				<style jsx global>{`
-					.react-medium-image-zoom__overlay {
-						background: rgba(255,255,255,0.2) !important;
-						backdrop-filter: blur(12px) !important;
-					}
-					.react-medium-image-zoom__zoom {
-						max-width: 60vw !important;
-						max-height: 40vh !important;
-						border-radius: 1rem !important;
-						box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-						margin: 5vh auto !important;
-					}
-				`}</style>
 			</div>
+			{/* Custom styles for react-medium-image-zoom modal */}
+			<style jsx global>{`
+				.react-medium-image-zoom__overlay {
+					background: rgba(255,255,255,0.2) !important;
+					backdrop-filter: blur(12px) !important;
+				}
+				.react-medium-image-zoom__zoom {
+					max-width: 60vw !important;
+					max-height: 40vh !important;
+					border-radius: 1rem !important;
+					box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+					margin: 5vh auto !important;
+				}
+			`}</style>
 			{showScrollButton && (
 				<div
 					style={{

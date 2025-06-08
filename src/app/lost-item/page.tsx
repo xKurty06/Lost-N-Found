@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from "next/link";
 import Zoom from 'react-medium-image-zoom';
@@ -13,29 +13,42 @@ import ReactDOM from 'react-dom';
 import { getUserFromCookie } from '@/utils/auth';
 import { useToast } from '@/components/ui/ToastProvider';
 
+interface Item {
+	id: number;
+	title: string;
+	description: string;
+	color: string | string[];
+	date_time_found: string;
+	location: string;
+	image_url?: string;
+	item_number?: number;
+	status: string;
+	users?: { username?: string };
+}
+
 export default function LostItemPage() {
 	const pathname = usePathname();
 	const [search, setSearch] = useState("");
 	const [pendingSearch, setPendingSearch] = useState("");
 	const [reportOpen, setReportOpen] = useState(false);
 	const [claimOpen, setClaimOpen] = useState(false);
-	const [claimItem, setClaimItem] = useState<any>(null);
+	const [claimItem, setClaimItem] = useState<Item | null>(null);
 	const [sort, setSort] = useState("recent");
 	const [showSortOptions, setShowSortOptions] = useState(false);
-	const [items, setItems] = useState<any[]>([]);
+	const [items, setItems] = useState<Item[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [copiedItemNumber, setCopiedItemNumber] = useState<string | null>(null);
 	const [showScrollButton, setShowScrollButton] = useState(false);
 	const [showClaimsLink, setShowClaimsLink] = useState(false);
-	const sortDropdownRef = useRef<HTMLDivElement>(null);
+	const sortDropdownRef = useRef(null);
 	const { showToast } = useToast();
-	const [user, setUser] = useState<any>(null);
+	const [user, setUser] = useState(null);
 
 	const sortOptions = [
 		{ value: "recent", label: "Most Recent" },
 		{ value: "oldest", label: "Oldest" },
 		{ value: "title", label: "Title (A-Z)" },
-		{ value: "color", label: "Color" }
+		{ value: "color", label: "Color" },
 	];
 
 	useEffect(() => {
@@ -58,202 +71,9 @@ export default function LostItemPage() {
 		setUser(getUserFromCookie());
 	}, []);
 
-	useEffect(() => {
-		if (!showSortOptions) return;
-		function handleClickOutside(e: MouseEvent) {
-			if (sortDropdownRef.current && !(sortDropdownRef.current as any).contains(e.target)) {
-				setShowSortOptions(false);
-			}
-		}
-		function handleEscape(e: KeyboardEvent) {
-			if (e.key === 'Escape') setShowSortOptions(false);
-		}
-		document.addEventListener('mousedown', handleClickOutside);
-		document.addEventListener('keydown', handleEscape);
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-			document.removeEventListener('keydown', handleEscape);
-		};
-	}, [showSortOptions]);
-
-	function sortItems(items: any[], sort: string) {
-		switch (sort) {
-			case "oldest":
-				return [...items].sort((a, b) => new Date(a.date_time_found).getTime() - new Date(b.date_time_found).getTime());
-			case "title":
-				return [...items].sort((a, b) => a.title.localeCompare(b.title));
-			case "color":
-				return [...items].sort((a, b) => {
-					const colorA = Array.isArray(a.color) ? (a.color[0] || '') : (a.color || '');
-					const colorB = Array.isArray(b.color) ? (b.color[0] || '') : (b.color || '');
-					return colorA.localeCompare(colorB);
-				});
-			case "recent":
-			default:
-				return [...items].sort((a, b) => new Date(b.date_time_found).getTime() - new Date(a.date_time_found).getTime());
-		}
-	}
-
-	const [, forceUpdate] = React.useReducer(x => x + 1, 0);
-
 	function handleSortSelect(option: string) {
-		console.log('Selected sort option:', option); // Debugging log
 		setSort(option);
 		setShowSortOptions(false);
-		forceUpdate(); // Force re-render to ensure UI updates
-	}
-
-	const filteredItems = useMemo(() => {
-		const filtered = items.filter(item => {
-			const status = item.status || '';
-			return status === 'not_claimed' || status === '';
-		});
-		const searchTerm = search.trim().toLowerCase();
-		const searched = !searchTerm ? filtered : filtered.filter(item => {
-			const inTitle = item.title?.toLowerCase().includes(searchTerm);
-			const inDesc = item.description?.toLowerCase().includes(searchTerm);
-			const inLoc = item.location?.toLowerCase().includes(searchTerm);
-			const inColor = Array.isArray(item.color)
-				? item.color.some((c: string) => c?.toLowerCase().includes(searchTerm))
-				: item.color?.toLowerCase().includes(searchTerm);
-			return inTitle || inDesc || inLoc || inColor;
-		});
-		return sortItems(searched, sort);
-	}, [search, sort, items]);
-
-	// Add a refreshItems function to fetch items again without reloading the browser
-	const refreshItems = async () => {
-		setLoading(true);
-		const supabase = createClient();
-		const { data, error } = await supabase
-			.from('items')
-			.select('*, users: user_id (username)')
-			.order('date_time_found', { ascending: false });
-		if (!error && data) {
-			setItems(data);
-		}
-		setLoading(false);
-	};
-
-	// Helper to format date in UTC+8 (Philippines timezone)
-	function formatPHDate(dateString: string) {
-		if (!dateString) return '';
-		const date = new Date(dateString);
-		return date.toLocaleString('en-PH', {
-			year: 'numeric', month: 'short', day: 'numeric',
-			hour: '2-digit', minute: '2-digit', hour12: true,
-			timeZone: 'Asia/Manila'
-		});
-	}
-
-	function DescriptionWithPopover({ description }: { description: string }) {
-		const [open, setOpen] = useState(false);
-		const spanRef = useRef<HTMLSpanElement>(null);
-		const popoverRef = useRef<HTMLDivElement>(null);
-		const buttonRef = useRef<HTMLButtonElement>(null);
-		const [truncated, setTruncated] = useState(false);
-		const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
-
-		useEffect(() => {
-			function recalc() {
-				if (spanRef.current) {
-					setTruncated(spanRef.current.scrollWidth > spanRef.current.clientWidth);
-				}
-			}
-			recalc();
-			window.addEventListener('resize', recalc);
-			window.addEventListener('orientationchange', recalc);
-			return () => {
-				window.removeEventListener('resize', recalc);
-				window.removeEventListener('orientationchange', recalc);
-			};
-		}, [description]);
-
-		// Position popover absolutely near the button using a portal
-		useEffect(() => {
-			if (open && buttonRef.current) {
-				const rect = buttonRef.current.getBoundingClientRect();
-				const popoverWidth = 320; // maxWidth
-				const minWidth = 220;
-				const viewportWidth = window.innerWidth;
-				let left = rect.left + window.scrollX + rect.width / 2 - popoverWidth / 2;
-				// Clamp so popover stays within viewport
-				if (left < 8) left = 8;
-				if (left + popoverWidth > viewportWidth - 8) left = viewportWidth - popoverWidth - 8;
-				setPopoverStyle({
-					position: 'absolute',
-					left,
-					top: rect.bottom + 6 + window.scrollY, // 6px gap
-					zIndex: 1000,
-					minWidth,
-					maxWidth: popoverWidth,
-				});
-			}
-		}, [open]);
-
-		// Close popover on click outside
-		useEffect(() => {
-			if (!open) return;
-			function handleClick(e: MouseEvent) {
-				if (
-					popoverRef.current &&
-					!popoverRef.current.contains(e.target as Node) &&
-					buttonRef.current &&
-					!buttonRef.current.contains(e.target as Node)
-				) {
-					setOpen(false);
-				}
-			}
-			document.addEventListener('mousedown', handleClick);
-			return () => {
-				document.removeEventListener('mousedown', handleClick);
-			};
-		}, [open]);
-
-		return (
-			<span className="text-xs flex items-center gap-1 relative">
-				{/* Description icon (calendar-like, same as other fields) */}
-				<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-				<span className="text-green-700 font-semibold text-xs">Description:</span>{' '}
-				<span
-					className="break-words text-xs max-w-[135px] inline-block align-bottom truncate overflow-hidden whitespace-nowrap"
-					ref={spanRef}
-					title={description}
-					style={{ userSelect: 'text' }}
-				>
-					{description}
-				</span>
-				{truncated && (
-					<button
-						className="text-cvsu-yellow underline ml-1 text-xs"
-						style={{ paddingLeft: 0 }}
-						onClick={() => setOpen(v => !v)}
-						type="button"
-						ref={buttonRef}
-						aria-haspopup="dialog"
-						aria-expanded={open}
-					>
-						See more
-					</button>
-				)}
-				{open && typeof window !== 'undefined' && ReactDOM.createPortal(
-					<div
-						ref={popoverRef}
-						className="bg-white rounded-xl shadow-2xl border border-green-200 p-4 animate-fadein-up"
-						tabIndex={-1}
-						role="dialog"
-						style={popoverStyle}
-					>
-						<h3 className="text-xs font-bold mb-2 text-green-700">Full Description</h3>
-						<div className="text-xs prose max-h-48 overflow-y-auto text-gray-800 mb-2 whitespace-pre-line break-words">{description}</div>
-						<div className="flex justify-end">
-							<button onClick={() => setOpen(false)} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 font-semibold text-xs">Close</button>
-						</div>
-					</div>,
-					document.body
-				)}
-			</span>
-		);
 	}
 
 	// --- SEARCH LOGIC ---
@@ -316,6 +136,179 @@ export default function LostItemPage() {
 		}
 		checkClaimsVisibility();
 	}, []);
+
+	// Remove useMemo for filteredItems
+	// Add a function to get filtered and sorted items
+	function getFilteredItems() {
+		// Filter by status first
+		const notClaimedItems = items.filter(item => item.status === 'not_claimed');
+		const searchTerm = search.trim().toLowerCase();
+		let searched = notClaimedItems;
+		if (searchTerm) {
+			searched = notClaimedItems.filter(item => {
+				const inTitle = item.title?.toLowerCase().includes(searchTerm);
+				const inDesc = item.description?.toLowerCase().includes(searchTerm);
+				const inLoc = item.location?.toLowerCase().includes(searchTerm);
+				const inColor = Array.isArray(item.color)
+					? item.color.some((c: string) => c?.toLowerCase().includes(searchTerm))
+					: item.color?.toLowerCase().includes(searchTerm);
+				return inTitle || inDesc || inLoc || inColor;
+			});
+		}
+		// Sort
+		return [...searched].sort((a, b) => {
+			switch (sort) {
+				case 'oldest':
+					return new Date(a.date_time_found || 0).getTime() - new Date(b.date_time_found || 0).getTime();
+				case 'title':
+					return (a.title || '').localeCompare(b.title || '');
+				case 'color': {
+					const colorA = Array.isArray(a.color) ? (a.color[0] || '') : (a.color || '');
+					const colorB = Array.isArray(b.color) ? (b.color[0] || '') : (b.color || '');
+					return colorA.localeCompare(colorB);
+				}
+				case 'recent':
+				default:
+					return new Date(b.date_time_found || 0).getTime() - new Date(a.date_time_found || 0).getTime();
+			}
+		});
+	}
+
+	// Helper to format date in UTC+8 (Philippines timezone)
+	function formatPHDate(dateString: string) {
+		if (!dateString) return '';
+		const date = new Date(dateString);
+		return date.toLocaleString('en-PH', {
+			year: 'numeric', month: 'short', day: 'numeric',
+			hour: '2-digit', minute: '2-digit', hour12: true,
+			timeZone: 'Asia/Manila'
+		});
+	}
+
+	// DescriptionWithPopover component
+	function DescriptionWithPopover({ description }: { description: string }) {
+		const [open, setOpen] = useState(false);
+		const spanRef = useRef<HTMLSpanElement>(null);
+		const popoverRef = useRef<HTMLDivElement>(null);
+		const buttonRef = useRef<HTMLButtonElement>(null);
+		const [truncated, setTruncated] = useState(false);
+		const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
+
+		useEffect(() => {
+			function recalc() {
+				if (spanRef.current) {
+					setTruncated(spanRef.current.scrollWidth > spanRef.current.clientWidth);
+				}
+			}
+			recalc();
+			window.addEventListener('resize', recalc);
+			window.addEventListener('orientationchange', recalc);
+			return () => {
+				window.removeEventListener('resize', recalc);
+				window.removeEventListener('orientationchange', recalc);
+			};
+		}, [description]);
+
+		useEffect(() => {
+			if (open && buttonRef.current) {
+				const rect = buttonRef.current.getBoundingClientRect();
+				const popoverWidth = 320;
+				const minWidth = 220;
+				const viewportWidth = window.innerWidth;
+				let left = rect.left + window.scrollX + rect.width / 2 - popoverWidth / 2;
+				if (left < 8) left = 8;
+				if (left + popoverWidth > viewportWidth - 8) left = viewportWidth - popoverWidth - 8;
+				setPopoverStyle({
+					position: 'absolute',
+					left,
+					top: rect.bottom + 6 + window.scrollY,
+					zIndex: 1000,
+					minWidth,
+					maxWidth: popoverWidth,
+				});
+			}
+		}, [open]);
+
+		useEffect(() => {
+			if (!open) return;
+			function handleClick(e: MouseEvent) {
+				if (
+					popoverRef.current &&
+					!popoverRef.current.contains(e.target as Node) &&
+					buttonRef.current &&
+					!buttonRef.current.contains(e.target as Node)
+				) {
+					setOpen(false);
+				}
+			}
+			document.addEventListener('mousedown', handleClick);
+			return () => {
+				document.removeEventListener('mousedown', handleClick);
+			};
+		}, [open]);
+
+		let portal = null;
+		if (open && typeof window !== 'undefined') {
+			portal = ReactDOM.createPortal(
+				<div
+					ref={popoverRef}
+					className="bg-white rounded-xl shadow-2xl border border-green-200 p-4 animate-fadein-up"
+					tabIndex={-1}
+					role="dialog"
+					style={popoverStyle}
+				>
+					<h3 className="text-xs font-bold mb-2 text-green-700">Full Description</h3>
+					<div className="text-xs prose max-h-48 overflow-y-auto text-gray-800 mb-2 whitespace-pre-line break-words">{description}</div>
+					<div className="flex justify-end">
+						<button onClick={() => setOpen(false)} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 font-semibold text-xs">Close</button>
+					</div>
+				</div>,
+				document.body
+			);
+		}
+		return (
+			<span className="text-xs flex items-center gap-1 relative">
+				<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+				<span className="text-green-700 font-semibold text-xs">Description:</span>{' '}
+				<span
+					className="break-words text-xs max-w-[135px] inline-block align-bottom truncate overflow-hidden whitespace-nowrap"
+					ref={spanRef}
+					title={description}
+					style={{ userSelect: 'text' }}
+				>
+					{description}
+				</span>
+				{truncated && (
+					<button
+						className="text-cvsu-yellow underline ml-1 text-xs"
+						style={{ paddingLeft: 0 }}
+						onClick={() => setOpen(v => !v)}
+						type="button"
+						ref={buttonRef}
+						aria-haspopup="dialog"
+						aria-expanded={open}
+					>
+						See more
+					</button>
+				)}
+				{portal}
+			</span>
+		);
+	}
+
+	// Add a refreshItems function to fetch items again without reloading the browser
+	const refreshItems = async () => {
+		setLoading(true);
+		const supabase = createClient();
+		const { data, error } = await supabase
+			.from('items')
+			.select('*, users: user_id (username)')
+			.order('date_time_found', { ascending: false });
+		if (!error && data) {
+			setItems(data);
+		}
+		setLoading(false);
+	};
 
 	return (
 		<div className="min-h-screen w-full flex flex-col">
@@ -557,10 +550,10 @@ export default function LostItemPage() {
 							<div className="lds-dual-ring" aria-label="Loading"></div>
 							<span className="mt-4">Loading items...</span>
 						</div>
-					) : filteredItems.length === 0 ? (
+					) : getFilteredItems().length === 0 ? (
 						<div className="col-span-full text-center text-white py-12 font-semibold text-lg drop-shadow-md">No items found.</div>
 					) : (
-						filteredItems.map(item => (
+						getFilteredItems().map(item => (
 							<div
 								key={item.id}
 								className="bg-white/95 rounded-2xl shadow-lg p-3 flex flex-col items-center border-4 border-green-700 transition-transform hover:scale-[1.025] hover:shadow-xl focus-within:shadow-xl outline-none"
@@ -690,7 +683,9 @@ export default function LostItemPage() {
 				>
 					<span className='pb-2'>+</span>
 				</button>
-				<HandleReport open={reportOpen} onClose={() => setReportOpen(false)} />
+				<div style={{ display: reportOpen ? 'block' : 'none' }}>
+				  <HandleReport open={true} onClose={() => setReportOpen(false)} />
+				</div>
 				<HandleClaim open={claimOpen} onClose={() => setClaimOpen(false)} onSubmit={() => setClaimOpen(false)} claimItem={claimItem} />
 				<div className="h-16 sm:h-24" /> {/* Spacer at the bottom for extra space below content and FAB */}
 			</div>
@@ -709,67 +704,67 @@ export default function LostItemPage() {
 				}
 			`}</style>
 			{showScrollButton && (
-							<div
-								style={{
-									position: 'fixed',
-									bottom: '24px',
-									left: '50%',
-									transform: 'translateX(-50%)',
-									display: 'flex',
-									flexDirection: 'column',
-									alignItems: 'center',
-									zIndex: 1000,
-								}}
-							>
-								<button
-									onClick={scrollToTop}
-									style={{
-										width: '30px',
-										height: '30px',
-										background: '#22c55e',
-										border: 'none',
-										borderRadius: '50%',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-										boxShadow: '0 4px 16px rgba(34,197,94,0.18)',
-										cursor: 'pointer',
-										transition: 'background 0.2s',
-										outline: 'none',
-										padding: 0,
-									}}
-									aria-label="Scroll to Top"
-									onMouseOver={e => (e.currentTarget.style.background = '#16a34a')}
-									onMouseOut={e => (e.currentTarget.style.background = '#22c55e')}
-								>
-									<Image src={'/icons/scroll_top.svg'} alt="Scroll to Top" width={24} height={24} />
-								</button>
-								<span
-									style={{
-										marginTop: '5px',
-										fontWeight: 'bold',
-										fontSize: '10px',
-										textShadow: '0 1px 4px rgba(0,0,0,0.08)',
-									}}
-								>
-									<span
-										onClick={scrollToTop}
-										onMouseOver={e => (e.currentTarget.style.color = '#16a34a')}
-										onMouseOut={e => (e.currentTarget.style.color = '#22c55e')}
-										style={{
-											cursor: 'pointer',
-											fontWeight: 'bold',
-											fontSize: '10px',
-											textShadow: '0 1px 4px rgba(0,0,0,0.08)',
-											color: '#22c55e',
-											transition: 'color 0.2s',
-										}}
-									>
-										BACK TO TOP
-									</span>
-								</span>
-							</div>
-						)}
+				<div
+					style={{
+						position: 'fixed',
+						bottom: '24px',
+						left: '50%',
+						transform: 'translateX(-50%)',
+						display: 'flex',
+						flexDirection: 'column',
+						alignItems: 'center',
+						zIndex: 1000,
+					}}
+				>
+					<button
+						onClick={scrollToTop}
+						style={{
+							width: '30px',
+							height: '30px',
+							background: '#22c55e',
+							border: 'none',
+							borderRadius: '50%',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							boxShadow: '0 4px 16px rgba(34,197,94,0.18)',
+							cursor: 'pointer',
+							transition: 'background 0.2s',
+							outline: 'none',
+							padding: 0,
+						}}
+						aria-label="Scroll to Top"
+						onMouseOver={e => (e.currentTarget.style.background = '#16a34a')}
+						onMouseOut={e => (e.currentTarget.style.background = '#22c55e')}
+					>
+						<Image src={'/icons/scroll_top.svg'} alt="Scroll to Top" width={24} height={24} />
+					</button>
+					<span
+						style={{
+							marginTop: '5px',
+							fontWeight: 'bold',
+							fontSize: '10px',
+							textShadow: '0 1px 4px rgba(0,0,0,0.08)',
+						}}
+					>
+						<span
+							onClick={scrollToTop}
+							onMouseOver={e => (e.currentTarget.style.color = '#16a34a')}
+							onMouseOut={e => (e.currentTarget.style.color = '#22c55e')}
+							style={{
+								cursor: 'pointer',
+								fontWeight: 'bold',
+								fontSize: '10px',
+								textShadow: '0 1px 4px rgba(0,0,0,0.08)',
+								color: '#22c55e',
+								transition: 'color 0.2s',
+							}}
+						>
+							BACK TO TOP
+						</span>
+					</span>
+				</div>
+			)}
 		</div>
 	);
 }
