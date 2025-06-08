@@ -268,7 +268,9 @@ export default function LostItemPage() {
 		}
 		return (
 			<span className="text-xs flex items-center gap-1 relative">
-				<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+				<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+					<path strokeLinecap="round" strokeLinejoin="round" d="M16.862 2.487a2.25 2.25 0 0 1 3.182 3.182l-12.2 12.2a2.25 2.25 0 0 1-.796.51l-4.13 1.377a.75.75 0 0 1-.948-.948l1.377-4.13a2.25 2.25 0 0 1 .51-.796l12.2-12.2Zm2.121 1.06a.75.75 0 0 0-1.06 0l-12.2 12.2a.75.75 0 0 0-.17.266l-1.13 3.39 3.39-1.13a.75.75 0 0 0 .266-.17l12.2-12.2a.75.75 0 0 0 0-1.06Z" />
+				</svg>
 				<span className="text-green-700 font-semibold text-xs">Description:</span>{' '}
 				<span
 					className="break-words text-xs max-w-[135px] inline-block align-bottom truncate overflow-hidden whitespace-nowrap"
@@ -684,9 +686,9 @@ export default function LostItemPage() {
 					<span className='pb-2'>+</span>
 				</button>
 				<div style={{ display: reportOpen ? 'block' : 'none' }}>
-					<HandleReport open={true} onClose={() => setReportOpen(false)} />
+					<HandleReport open={true} onClose={() => setReportOpen(false)} onSubmit={() => { setReportOpen(false); refreshItems(); }} />
 				</div>
-				<HandleClaim open={claimOpen} onClose={() => setClaimOpen(false)} onSubmit={() => setClaimOpen(false)} claimItem={claimItem} />
+				<HandleClaim open={claimOpen} onClose={() => setClaimOpen(false)} onSubmit={() => { setClaimOpen(false); refreshItems(); }} claimItem={claimItem} />
 				<div className="h-16 sm:h-24" /> {/* Spacer at the bottom for extra space below content and FAB */}
 			</div>
 			{/* Custom styles for react-medium-image-zoom modal */}

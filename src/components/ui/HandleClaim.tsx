@@ -224,6 +224,7 @@ export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
             const { error: insertError } = await supabase.from('pending_claims').insert({
                 description: reason,
                 characteristics,
+                brand, // <-- include brand in the claim
                 item_id: item.id,
                 claimer_id: user.id,
                 full_name: name,
