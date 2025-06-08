@@ -143,13 +143,6 @@ export default function HandleReport({ open, onClose, onSubmit }: {
     // Prevent background scroll when modal is open
     React.useEffect(() => {
         if (open) {
-            // Check for user cookie
-            const user = getUserFromCookie();
-            if (!user) {
-                showToast('You must be logged in to report an item.', 'error');
-                router.push('/login');
-                onClose();
-            }
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
@@ -179,13 +172,6 @@ export default function HandleReport({ open, onClose, onSubmit }: {
     // Prevent background scroll when modal is open
     React.useEffect(() => {
         if (open) {
-            // Check for user cookie
-            const user = getUserFromCookie();
-            if (!user) {
-                showToast('You must be logged in to report an item.', 'error');
-                router.push('/login');
-                onClose();
-            }
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';

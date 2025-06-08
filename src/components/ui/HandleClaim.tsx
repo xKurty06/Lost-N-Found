@@ -36,13 +36,6 @@ export default function HandleClaim({ open, onClose, onSubmit }: {
 
     React.useEffect(() => {
         if (open) {
-            // Check for user cookie
-            const user = getUserFromCookie();
-            if (!user) {
-                showToast('You must be logged in to claim an item.', 'error');
-                if (router) router.push('/login');
-                onClose();
-            }
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';

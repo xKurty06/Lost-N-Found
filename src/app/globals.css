@@ -65,3 +65,23 @@ body {
   width: 0;
   animation: about-underline 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
 }
+.lds-dual-ring {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: 4px;
+  border-radius: 50%;
+  border: 4px solid #16a34a;
+  border-color: #16a34a transparent #16a34a transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}

@@ -166,7 +166,7 @@ export default function Page() {
                         quality={100}
                     />
                 </div>
-                <div className="flex flex-col w-full max-w-4xl px-8 pt-24 pb-10 relative z-10">
+                <div className="flex flex-col w-full max-w-4xl px-8 pt-24 pb-10 relative z-10 items-center justify-center text-center">
                     <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-[0_6px_32px_rgba(0,0,0,0.7)] mb-32 tracking-tight mt-36">
                         Welcome!
                     </h1>
@@ -218,7 +218,7 @@ export default function Page() {
                     {/* LOST ITEM */}
                     <Link href="/lost-item" className="flex flex-col items-center w-full md:w-1/2 max-w-md">
                         <button className={`flex items-center bg-[#003e22] bg-opacity-90 rounded-xl px-10 py-6 shadow-lg transition hover:bg-green-800 group w-full justify-center transform hover:scale-105 duration-200 relative ${showClickMe ? 'ring-4 ring-yellow-400 animate-bounce' : ''}`}>
-                            <span className="text-4xl md:text-5xl font-extrabold text-gray-100 tracking-wide font-[cursive]">LOST ITEM</span>
+                            <span className="text-4xl md:text-5xl font-extrabold text-gray-100 tracking-wide">LOST ITEM</span>
                             <img src="/icons/lostitem-icon.svg" alt="Lost Icon" className="w-14 h-14 ml-4" />
                             {showClickMe && (
                                 <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ff9400] text-black font-bold px-3 py-1 rounded-full text-sm shadow-lg animate-pulse z-10">Click me!</span>
@@ -232,7 +232,7 @@ export default function Page() {
                     <div className="flex flex-col items-center w-full md:w-1/2 max-w-md">
                         <Link href="/found-item" className="w-full">
                             <button className={`flex items-center bg-[#003e22] bg-opacity-90 rounded-xl px-13 py-6 shadow-lg transition hover:bg-green-800 group w-full justify-center transform hover:scale-105 duration-200 relative ${showClickMe ? 'ring-4 ring-yellow-400 animate-bounce' : ''}`}>
-                                <span className="text-4xl md:text-5xl font-extrabold text-gray-100 tracking-wide font-[cursive]">FOUND ITEM</span>
+                                <span className="text-4xl md:text-5xl font-extrabold text-gray-100 tracking-wide">FOUND ITEM</span>
                                 <img src="/icons/founditem-icon.svg" alt="Found Icon" className="w-14 h-14 ml-4" />
                                 {showClickMe && (
                                     <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ff9400] text-black font-bold px-3 py-1 rounded-full text-sm shadow-lg animate-pulse z-10">Click me!</span>
@@ -291,17 +291,17 @@ export default function Page() {
                     <div className="flex flex-col md:flex-row gap-8 md:gap-10 w-full justify-center items-stretch mb-26">
                         <div className="flex flex-col items-center border border-green-400 rounded-2xl p-10 w-full max-w-[270px] min-h-[340px] bg-white/80 shadow-xl transition-shadow hover:shadow-2xl flex-1 animate-slidein-up">
                             <img src="/icons/report-icon.png" alt="Report Icon" className="h-16 w-16 mb-7 drop-shadow-lg" />
-                            <span className="font-extrabold text-2xl mb-3 text-green-800 font-[cursive]">Report</span>
+                            <span className="font-extrabold text-2xl mb-3 text-green-800">Report</span>
                             <span className="text-lg text-gray-700 text-center">Submit details of item you found.</span>
                         </div>
                         <div className="flex flex-col items-center border border-green-400 rounded-2xl p-10 w-full max-w-[270px] min-h-[340px] bg-white/80 shadow-xl transition-shadow hover:shadow-2xl flex-1 animate-slidein-up delay-100">
                             <img src="/icons/find-icon.png" alt="Browse Icon" className="h-16 w-16 mb-7 drop-shadow-lg" />
-                            <span className="font-extrabold text-2xl mb-3 text-green-800 font-[cursive]">Browse</span>
+                            <span className="font-extrabold text-2xl mb-3 text-green-800">Browse</span>
                             <span className="text-lg text-gray-700 text-center">Find and browse reported found items.</span>
                         </div>
                         <div className="flex flex-col items-center border border-green-400 rounded-2xl p-10 w-full max-w-[270px] min-h-[340px] bg-white/80 shadow-xl transition-shadow hover:shadow-2xl flex-1 animate-slidein-up delay-200">
                             <img src="/icons/found-icon.png" alt="Claim Icon" className="h-16 w-16 mb-7 drop-shadow-lg" />
-                            <span className="font-extrabold text-2xl mb-3 text-green-800 font-[cursive]">Claim</span>
+                            <span className="font-extrabold text-2xl mb-3 text-green-800">Claim</span>
                             <span className="text-lg text-gray-700 text-center">Confirm and reclaim your item.</span>
                         </div>
                     </div>

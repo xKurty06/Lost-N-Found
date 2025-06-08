@@ -9,17 +9,23 @@ import 'react-medium-image-zoom/dist/styles.css';
 import HandleReport from "@/components/ui/HandleReport";
 import { createClient } from '@/supabase/clients/client';
 import ReactDOM from 'react-dom';
+import { getUserFromCookie } from '@/utils/auth';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export default function FoundItemPage() {
 	const pathname = usePathname();
 	const [search, setSearch] = useState("");
 	const [pendingSearch, setPendingSearch] = useState("");
+	const [searchLoading, setSearchLoading] = useState(false);
 	const [reportOpen, setReportOpen] = useState(false);
 	const [sort, setSort] = useState("recent");
 	const [showSortOptions, setShowSortOptions] = useState(false);
 	const [items, setItems] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [copiedItemNumber, setCopiedItemNumber] = useState<string | null>(null);
+	const { showToast } = useToast();
+	const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+	const [showScrollButton, setShowScrollButton] = useState(false);
 
 	const sortOptions = [
 		{ value: "recent", label: "Most Recent" },
@@ -65,25 +71,45 @@ export default function FoundItemPage() {
 			case "title":
 				return [...items].sort((a, b) => a.title.localeCompare(b.title));
 			case "color":
-				return [...items].sort((a, b) => (a.color?.[0] || '').localeCompare(b.color?.[0] || ''));
+				return [...items].sort((a, b) => {
+					const colorA = Array.isArray(a.color) ? (a.color[0] || '') : (a.color || '');
+					const colorB = Array.isArray(b.color) ? (b.color[0] || '') : (b.color || '');
+					return colorA.localeCompare(colorB);
+				});
 			case "recent":
 			default:
 				return [...items].sort((a, b) => new Date(b.date_time_found).getTime() - new Date(a.date_time_found).getTime());
 		}
 	}
 
+	const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+
 	function handleSortSelect(option: string) {
+		console.log('Selected sort option:', option); // Debugging log
 		setSort(option);
 		setShowSortOptions(false);
+		forceUpdate(); // Force re-render to ensure UI updates
 	}
 
 	const filteredItems = React.useMemo(() => {
-		let filtered = items.filter(item =>
-			item.status === 'claimed' && (
-				item.title?.toLowerCase().includes(search.toLowerCase())
-			)
-		);
-		return sortItems(filtered, sort);
+		console.log('Current sort:', sort); // Debugging log
+		console.log('Items before filtering:', items); // Debugging log
+		let filtered = items.filter(item => {
+			const status = item.status || '';
+			const matchesStatus = status === 'claimed' || status === '';
+			const searchTerm = search.trim().toLowerCase();
+			if (!searchTerm) return matchesStatus;
+			const inTitle = item.title?.toLowerCase().includes(searchTerm);
+			const inDesc = item.description?.toLowerCase().includes(searchTerm);
+			const inLoc = item.location?.toLowerCase().includes(searchTerm);
+			const inColor = Array.isArray(item.color)
+				? item.color.some((c: string) => c?.toLowerCase().includes(searchTerm))
+				: item.color?.toLowerCase().includes(searchTerm);
+			return matchesStatus && (inTitle || inDesc || inLoc || inColor);
+		});
+		const sorted = sortItems(filtered, sort);
+		console.log('Sorted items:', sorted); // Debugging log
+		return sorted;
 	}, [search, sort, items]);
 
 	const sortDropdownRef = React.useRef<HTMLDivElement>(null);
@@ -144,13 +170,20 @@ export default function FoundItemPage() {
 		useEffect(() => {
 			if (open && buttonRef.current) {
 				const rect = buttonRef.current.getBoundingClientRect();
+				const popoverWidth = 320; // maxWidth
+				const minWidth = 220;
+				const viewportWidth = window.innerWidth;
+				let left = rect.left + window.scrollX + rect.width / 2 - popoverWidth / 2;
+				// Clamp so popover stays within viewport
+				if (left < 8) left = 8;
+				if (left + popoverWidth > viewportWidth - 8) left = viewportWidth - popoverWidth - 8;
 				setPopoverStyle({
 					position: 'absolute',
-					left: rect.left + window.scrollX,
+					left,
 					top: rect.bottom + 6 + window.scrollY, // 6px gap
 					zIndex: 1000,
-					minWidth: 220,
-					maxWidth: 320,
+					minWidth,
+					maxWidth: popoverWidth,
 				});
 			}
 		}, [open]);
@@ -174,6 +207,25 @@ export default function FoundItemPage() {
 			};
 		}, [open]);
 
+		let portal = null;
+		if (open && typeof window !== 'undefined') {
+			portal = ReactDOM.createPortal(
+				<div
+					ref={popoverRef}
+					className="bg-white rounded-xl shadow-2xl border border-green-200 p-4 animate-fadein-up"
+					tabIndex={-1}
+					role="dialog"
+					style={popoverStyle}
+				>
+					<h3 className="text-xs font-bold mb-2 text-green-700">Full Description</h3>
+					<div className="text-xs prose max-h-48 overflow-y-auto text-gray-800 mb-2 whitespace-pre-line break-words">{description}</div>
+					<div className="flex justify-end">
+						<button onClick={() => setOpen(false)} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 font-semibold text-xs">Close</button>
+					</div>
+				</div>,
+				document.body
+			);
+		}
 		return (
 			<span className="text-xs flex items-center gap-1 relative">
 				{/* Description icon (calendar-like, same as other fields) */}
@@ -200,25 +252,69 @@ export default function FoundItemPage() {
 						...See more
 					</button>
 				)}
-				{open && typeof window !== 'undefined' && ReactDOM.createPortal(
-					<div
-						ref={popoverRef}
-						className="bg-white rounded-xl shadow-2xl border border-green-200 p-4 animate-fadein-up"
-						tabIndex={-1}
-						role="dialog"
-						style={popoverStyle}
-					>
-						<h3 className="text-xs font-bold mb-2 text-green-700">Full Description</h3>
-						<div className="text-xs prose max-h-48 overflow-y-auto text-gray-800 mb-2 whitespace-pre-line break-words">{description}</div>
-						<div className="flex justify-end">
-							<button onClick={() => setOpen(false)} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 font-semibold text-xs">Close</button>
-						</div>
-					</div>,
-					document.body
-				)}
+				{portal}
 			</span>
 		);
 	}
+
+	// --- SEARCH LOGIC ---
+	// Debounced live search with loading effect
+	useEffect(() => {
+		if (pendingSearch !== search) {
+			setSearchLoading(true);
+			if (searchTimeout.current) clearTimeout(searchTimeout.current);
+			searchTimeout.current = setTimeout(() => {
+				setSearch(pendingSearch);
+				setSearchLoading(false);
+			}, 300);
+		}
+		return () => {
+			if (searchTimeout.current) clearTimeout(searchTimeout.current);
+		};
+	}, [pendingSearch]);
+
+	useEffect(() => {
+		if (searchLoading) {
+			setLoading(true);
+			// Simulate fetch delay (5 seconds)
+			const timeout = setTimeout(() => {
+				setLoading(false);
+			}, 5000);
+			return () => clearTimeout(timeout);
+		} else {
+			setLoading(false);
+		}
+	}, [searchLoading]);
+
+	// When clearing search, stop loading and clear timeout
+	useEffect(() => {
+		if (pendingSearch === "") {
+			setSearch("");
+			setSearchLoading(false);
+			setLoading(false);
+			if (searchTimeout.current) {
+				clearTimeout(searchTimeout.current);
+			}
+		}
+	}, [pendingSearch]);
+
+	// Show loading spinner when switching between lost/found
+	useEffect(() => {
+		setLoading(true);
+	}, [pathname]);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			setShowScrollButton(window.scrollY > 300);
+		};
+
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, []);
+
+	const scrollToTop = () => {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
 
 	return (
 		<div className="min-h-screen w-full flex flex-col">
@@ -264,11 +360,6 @@ export default function FoundItemPage() {
 									onChange={e => setPendingSearch(e.target.value)}
 									className="rounded-l-full rounded-r-full border-none px-4 py-2 w-full min-w-0 focus:outline-none focus:ring-2 focus:ring-green-400 text-green-900 placeholder:text-green-900 bg-white shadow-md pr-12 text-base"
 									aria-label="Search found items"
-									onKeyDown={e => {
-										if (e.key === 'Enter') {
-											setSearch(pendingSearch);
-										}
-									}}
 									style={{ boxShadow: '0 2px 8px rgba(0,64,0,0.08)' }}
 								/>
 								<button
@@ -279,22 +370,18 @@ export default function FoundItemPage() {
 										if (pendingSearch) {
 											setPendingSearch("");
 											setSearch("");
-										} else {
-											setSearch(pendingSearch);
 										}
 									}}
 									tabIndex={0}
 									disabled={!pendingSearch && !search}
 									style={{ boxShadow: '0 2px 8px rgba(0,64,0,0.08)', borderTopRightRadius: '9999px', borderBottomRightRadius: '9999px' }}
 								>
-									{pendingSearch ? (
-										<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-										</svg>
+									{searchLoading ? (
+										<svg className="animate-spin" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+									) : pendingSearch ? (
+										<img src="/icons/x_icon.svg" alt="Clear" className="w-5 h-5" />
 									) : (
-										<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
-										</svg>
+										<img src="/icons/find-icon.png" alt="Search" className="w-5 h-5" />
 									)}
 								</button>
 							</div>
@@ -368,8 +455,14 @@ export default function FoundItemPage() {
 										placeholder="Search"
 										value={pendingSearch}
 										onChange={e => {
-											setPendingSearch(e.target.value);
-											if (search !== "") setSearch(""); // Reset search if user starts typing after search is set
+											const value = e.target.value;
+											setPendingSearch(value);
+											setSearchLoading(true);
+											if (searchTimeout.current) clearTimeout(searchTimeout.current);
+											searchTimeout.current = setTimeout(() => {
+												setSearch(value);
+												setSearchLoading(false);
+											}, 300);
 										}}
 										className="rounded-full border border-green-900 px-3 py-1.5 w-full min-w-0 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-700 hover:border-green-700 transition text-gray-800 placeholder:text-green-900 pr-12 ml-20"
 										aria-label="Search found items"
@@ -446,7 +539,10 @@ export default function FoundItemPage() {
 				{/* --- Grid container: truly edge-to-edge, no horizontal padding, minimal gap --- */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-3 gap-y-5 max-w-6xl mx-0 px-0 pb-8">
 					{loading ? (
-						<div className="col-span-full text-center text-white py-12 font-semibold text-lg drop-shadow-md">Loading items...</div>
+						<div className="col-span-full text-center text-white py-12 font-semibold text-lg drop-shadow-md flex flex-col items-center justify-center">
+							<div className="lds-dual-ring" aria-label="Loading"></div>
+							<span className="mt-4">Loading items...</span>
+						</div>
 					) : filteredItems.length === 0 ? (
 						<div className="col-span-full text-center text-white py-12 font-semibold text-lg drop-shadow-md">No items found.</div>
 					) : (
@@ -556,7 +652,14 @@ export default function FoundItemPage() {
 				</div>
 				<button
 					className="fixed bottom-10 right-10 bg-green-600 hover:bg-green-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-2xl text-4xl border-4 border-white"
-					onClick={() => setReportOpen(true)}
+					onClick={() => {
+						const user = getUserFromCookie();
+						if (!user) {
+							showToast('You must be logged in to report an item.', 'error');
+							return;
+						}
+						setReportOpen(true);
+					}}
 					aria-label="Report Lost/Found Item"
 				>
 					<span className='pb-2'>+</span>
@@ -578,6 +681,68 @@ export default function FoundItemPage() {
 					}
 				`}</style>
 			</div>
+			{showScrollButton && (
+				<div
+					style={{
+						position: 'fixed',
+						bottom: '24px',
+						left: '50%',
+						transform: 'translateX(-50%)',
+						display: 'flex',
+						flexDirection: 'column',
+						alignItems: 'center',
+						zIndex: 1000,
+					}}
+				>
+					<button
+						onClick={scrollToTop}
+						style={{
+							width: '30px',
+							height: '30px',
+							background: '#22c55e',
+							border: 'none',
+							borderRadius: '50%',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							boxShadow: '0 4px 16px rgba(34,197,94,0.18)',
+							cursor: 'pointer',
+							transition: 'background 0.2s',
+							outline: 'none',
+							padding: 0,
+						}}
+						aria-label="Scroll to Top"
+						onMouseOver={e => (e.currentTarget.style.background = '#16a34a')}
+						onMouseOut={e => (e.currentTarget.style.background = '#22c55e')}
+					>
+						<Image src={'/icons/scroll_top.svg'} alt="Scroll to Top" width={24} height={24} />
+					</button>
+					<span
+						style={{
+							marginTop: '5px',
+							fontWeight: 'bold',
+							fontSize: '10px',
+							textShadow: '0 1px 4px rgba(0,0,0,0.08)',
+						}}
+					>
+						<span
+							onClick={scrollToTop}
+							onMouseOver={e => (e.currentTarget.style.color = '#16a34a')}
+							onMouseOut={e => (e.currentTarget.style.color = '#22c55e')}
+							style={{
+								cursor: 'pointer',
+								fontWeight: 'bold',
+								fontSize: '10px',
+								textShadow: '0 1px 4px rgba(0,0,0,0.08)',
+								color: '#22c55e',
+								transition: 'color 0.2s',
+							}}
+						>
+							BACK TO TOP
+						</span>
+					</span>
+				</div>
+			)}
 		</div>
 	);
 }
