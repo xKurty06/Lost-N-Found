@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,6 +8,7 @@ import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
 import HandleReport from "@/components/ui/HandleReport";
 import { createClient } from '@/supabase/clients/client';
+import ReactDOM from 'react-dom';
 
 export default function FoundItemPage() {
 	const pathname = usePathname();
@@ -79,10 +80,7 @@ export default function FoundItemPage() {
 	const filteredItems = React.useMemo(() => {
 		let filtered = items.filter(item =>
 			item.status === 'claimed' && (
-				item.title?.toLowerCase().includes(search.toLowerCase()) ||
-				item.location?.toLowerCase().includes(search.toLowerCase()) ||
-				item.description?.toLowerCase().includes(search.toLowerCase()) ||
-				(item.color && Array.isArray(item.color) ? item.color.join(', ').toLowerCase().includes(search.toLowerCase()) : (item.color || '').toLowerCase().includes(search.toLowerCase()))
+				item.title?.toLowerCase().includes(search.toLowerCase())
 			)
 		);
 		return sortItems(filtered, sort);
@@ -117,6 +115,109 @@ export default function FoundItemPage() {
 			hour: '2-digit', minute: '2-digit', hour12: true,
 			timeZone: 'Asia/Manila'
 		});
+	}
+
+	function DescriptionWithPopover({ description }: { description: string }) {
+		const [open, setOpen] = useState(false);
+		const spanRef = useRef<HTMLSpanElement>(null);
+		const popoverRef = useRef<HTMLDivElement>(null);
+		const buttonRef = useRef<HTMLButtonElement>(null);
+		const [truncated, setTruncated] = useState(false);
+		const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
+
+		useEffect(() => {
+			function recalc() {
+				if (spanRef.current) {
+					setTruncated(spanRef.current.scrollWidth > spanRef.current.clientWidth);
+				}
+			}
+			recalc();
+			window.addEventListener('resize', recalc);
+			window.addEventListener('orientationchange', recalc);
+			return () => {
+				window.removeEventListener('resize', recalc);
+				window.removeEventListener('orientationchange', recalc);
+			};
+		}, [description]);
+
+		// Position popover absolutely near the button using a portal
+		useEffect(() => {
+			if (open && buttonRef.current) {
+				const rect = buttonRef.current.getBoundingClientRect();
+				setPopoverStyle({
+					position: 'absolute',
+					left: rect.left + window.scrollX,
+					top: rect.bottom + 6 + window.scrollY, // 6px gap
+					zIndex: 1000,
+					minWidth: 220,
+					maxWidth: 320,
+				});
+			}
+		}, [open]);
+
+		// Close popover on click outside
+		useEffect(() => {
+			if (!open) return;
+			function handleClick(e: MouseEvent) {
+				if (
+					popoverRef.current &&
+					!popoverRef.current.contains(e.target as Node) &&
+					buttonRef.current &&
+					!buttonRef.current.contains(e.target as Node)
+				) {
+					setOpen(false);
+				}
+			}
+			document.addEventListener('mousedown', handleClick);
+			return () => {
+				document.removeEventListener('mousedown', handleClick);
+			};
+		}, [open]);
+
+		return (
+			<span className="text-xs flex items-center gap-1 relative">
+				{/* Description icon (calendar-like, same as other fields) */}
+				<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+				<span className="text-green-700 font-semibold text-xs">Description:</span>{' '}
+				<span
+					className="break-words text-xs max-w-[130px] inline-block align-bottom truncate overflow-hidden whitespace-nowrap"
+					ref={spanRef}
+					title={description}
+					style={{ userSelect: 'text' }}
+				>
+					{description}
+				</span>
+				{truncated && (
+					<button
+						className="text-cvsu-yellow underline ml-1 text-xs"
+						style={{ paddingLeft: 0 }}
+						onClick={() => setOpen(v => !v)}
+						type="button"
+						ref={buttonRef}
+						aria-haspopup="dialog"
+						aria-expanded={open}
+					>
+						...See more
+					</button>
+				)}
+				{open && typeof window !== 'undefined' && ReactDOM.createPortal(
+					<div
+						ref={popoverRef}
+						className="bg-white rounded-xl shadow-2xl border border-green-200 p-4 animate-fadein-up"
+						tabIndex={-1}
+						role="dialog"
+						style={popoverStyle}
+					>
+						<h3 className="text-xs font-bold mb-2 text-green-700">Full Description</h3>
+						<div className="text-xs prose max-h-48 overflow-y-auto text-gray-800 mb-2 whitespace-pre-line break-words">{description}</div>
+						<div className="flex justify-end">
+							<button onClick={() => setOpen(false)} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 font-semibold text-xs">Close</button>
+						</div>
+					</div>,
+					document.body
+				)}
+			</span>
+		);
 	}
 
 	return (
@@ -305,7 +406,7 @@ export default function FoundItemPage() {
 											disabled={!pendingSearch}
 										>
 											<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white">
-												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
 											</svg>
 										</button>
 									)}
@@ -343,7 +444,7 @@ export default function FoundItemPage() {
 					</div>
 				</div>
 				{/* --- Grid container: truly edge-to-edge, no horizontal padding, minimal gap --- */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-4 max-w-5xl mx-0 px-0 pb-8">
+				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-3 gap-y-5 max-w-6xl mx-0 px-0 pb-8">
 					{loading ? (
 						<div className="col-span-full text-center text-white py-12 font-semibold text-lg drop-shadow-md">Loading items...</div>
 					) : filteredItems.length === 0 ? (
@@ -418,10 +519,7 @@ export default function FoundItemPage() {
 										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 12.414a4 4 0 10-1.414 1.414l4.243 4.243a1 1 0 001.414-1.414z" /></svg>
 										<span className="text-green-700 font-semibold">Location:</span> {item.location}
 									</p>
-									<p className="text-xs flex items-center gap-1">
-										<svg className="inline w-4 h-4 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 7.165 6 9.388 6 12v2.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-										<span className="text-green-700 font-semibold">Description:</span> {item.description}
-									</p>
+									<DescriptionWithPopover description={item.description} />
 									<p className="text-xs flex items-center gap-1">
 										<span className="inline-block w-3 h-3 rounded-full border border-green-700 mr-1" style={{ background: Array.isArray(item.color) ? (item.color[0]?.toLowerCase() || '') : (item.color?.toLowerCase() || '') }}></span>
 										<span className="text-green-700 font-semibold">Color:</span> {Array.isArray(item.color) ? item.color.join(', ') : item.color}
