@@ -29,6 +29,7 @@ export default function LostItemPage() {
 	const [showClaimsLink, setShowClaimsLink] = useState(false);
 	const sortDropdownRef = useRef<HTMLDivElement>(null);
 	const { showToast } = useToast();
+	const [user, setUser] = useState<any>(null);
 
 	const sortOptions = [
 		{ value: "recent", label: "Most Recent" },
@@ -51,6 +52,10 @@ export default function LostItemPage() {
 			setLoading(false);
 		}
 		fetchItems();
+	}, []);
+
+	useEffect(() => {
+		setUser(getUserFromCookie());
 	}, []);
 
 	useEffect(() => {
@@ -98,25 +103,22 @@ export default function LostItemPage() {
 		forceUpdate(); // Force re-render to ensure UI updates
 	}
 
-	const filteredItems = React.useMemo(() => {
-		console.log('Current sort:', sort); // Debugging log
-		console.log('Items before filtering:', items); // Debugging log
-		let filtered = items.filter(item => {
+	const filteredItems = useMemo(() => {
+		const filtered = items.filter(item => {
 			const status = item.status || '';
-			const matchesStatus = status === 'not_claimed' || status === '';
-			const searchTerm = search.trim().toLowerCase();
-			if (!searchTerm) return matchesStatus;
+			return status === 'not_claimed' || status === '';
+		});
+		const searchTerm = search.trim().toLowerCase();
+		const searched = !searchTerm ? filtered : filtered.filter(item => {
 			const inTitle = item.title?.toLowerCase().includes(searchTerm);
 			const inDesc = item.description?.toLowerCase().includes(searchTerm);
 			const inLoc = item.location?.toLowerCase().includes(searchTerm);
 			const inColor = Array.isArray(item.color)
 				? item.color.some((c: string) => c?.toLowerCase().includes(searchTerm))
 				: item.color?.toLowerCase().includes(searchTerm);
-			return matchesStatus && (inTitle || inDesc || inLoc || inColor);
+			return inTitle || inDesc || inLoc || inColor;
 		});
-		const sorted = sortItems(filtered, sort);
-		console.log('Sorted items:', sorted); // Debugging log
-		return sorted;
+		return sortItems(searched, sort);
 	}, [search, sort, items]);
 
 	// Add a refreshItems function to fetch items again without reloading the browser
