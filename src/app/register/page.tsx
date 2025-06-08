@@ -27,11 +27,13 @@ function RegisterForm({ agree, setAgree, openModal }: RegisterFormProps) {
     const [usernameError, setUsernameError] = useState<string | null>(null);
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+    const [checkingUsername, setCheckingUsername] = useState(false);
     const usernameRef = React.useRef<HTMLInputElement>(null);
     const passwordRef = React.useRef<HTMLInputElement>(null);
     const confirmPasswordRef = React.useRef<HTMLInputElement>(null);
     const router = useRouter();
     const { showToast } = useToast();
+    const usernameCheckTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -109,6 +111,24 @@ function RegisterForm({ agree, setAgree, openModal }: RegisterFormProps) {
 
     const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUsernameLength(e.target.value.length);
+        setUsernameError(null);
+        const username = e.target.value.trim();
+        if (usernameCheckTimeout.current) clearTimeout(usernameCheckTimeout.current);
+        if (!username || username.length < 4) return;
+        setCheckingUsername(true);
+        usernameCheckTimeout.current = setTimeout(async () => {
+            const client = createClient();
+            const { data: existing } = await client
+                .from('users')
+                .select('id')
+                .eq('username', username)
+                .maybeSingle();
+            setCheckingUsername(false);
+            if (existing) {
+                setUsernameError('Username already taken.');
+                showToast('Username already taken.', 'error');
+            }
+        }, 400);
     };
     const handlePasswordBlur = () => {
         const password = passwordRef.current?.value || '';
@@ -147,7 +167,11 @@ function RegisterForm({ agree, setAgree, openModal }: RegisterFormProps) {
                             className="w-full px-4 py-2 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-cvsu-yellow shadow pr-16"
                             ref={usernameRef}
                             onChange={handleUsernameChange}
+                            autoComplete="off"
                         />
+                        {checkingUsername && (
+                            <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-yellow-500 animate-pulse">Checking...</span>
+                        )}
                         <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs ${usernameLength > 20 ? 'text-red-500' : 'text-gray-400'}`}>{usernameLength}/20</span>
                     </div>
                     {usernameError && <div className="text-red-500 text-xs font-semibold mt-1 ml-1">{usernameError}</div>}

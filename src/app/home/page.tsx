@@ -167,11 +167,11 @@ export default function Page() {
                     />
                 </div>
                 <div className="flex flex-col w-full max-w-4xl px-8 pt-24 pb-10 relative z-10 items-center justify-center text-center">
-                    <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-[0_6px_32px_rgba(0,0,0,0.7)] mb-32 tracking-tight mt-36">
+                    <h1 className="text-6xl md:text-8xl font-extrabold text-white drop-shadow-[0_6px_32px_rgba(0,0,0,0.7)] mb-20 tracking-tight mt-40">
                         Welcome!
                     </h1>
                     <div className="items-center justify-center text-center">
-                        <p className="text-2xl md:text-4xl font-semibold text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] mb-20 tracking-wide animate-fadein-slow">
+                        <p className="text-2xl md:text-4xl font-semibold text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] mb-10 tracking-wide animate-fadein-slow">
                             Lost something? Found something?<br />
                             <span className="text-cvsu-yellow font-extrabold animate-pulse text-5xl drop-shadow-[0_2px_16px_rgba(255,224,102,0.7)]">We're here to help</span> – get started now!
                         </p>
