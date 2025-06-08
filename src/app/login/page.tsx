@@ -39,24 +39,24 @@ function LoginForm() {
       const client = createClient();
       const { data: user } = await client
         .from('users')
-        .select('id, password_hash')
+        .select('id, username, password_hash, role')
         .eq('username', username)
         .maybeSingle();
       if (!user) {
-        showToast('Invalid username or password.', 'error');
+        showToast('Incorrect username or password.', 'error');
         setLoading(false);
         return;
       }
       const match = await bcrypt.compare(password, user.password_hash);
       if (!match) {
-        showToast('Invalid username or password.', 'error');
+        showToast('Incorrect username or password.', 'error');
         setLoading(false);
         return;
       }
       showToast('Login successful!', 'success');
       setLoading(false);
-      // Set cookie for session (username and user id)
-      Cookies.set('lfhub_user', JSON.stringify({ id: user.id, username }), { expires: 7 });
+      // Set cookie for session (id, username, and role)
+      Cookies.set('lfhub_user', JSON.stringify({ id: user.id, username: user.username, role: user.role }), { expires: 7 });
       window.location.href = '/home';
     } catch (err) {
       showToast('Unexpected error. Please try again.', 'error');

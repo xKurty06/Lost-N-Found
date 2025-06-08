@@ -11,18 +11,37 @@ export default function Navbar() {
     const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
     const [user, setUser] = useState<any>(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [hasReportedItem, setHasReportedItem] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         // Read user from cookie
         const cookie = Cookies.get('lfhub_user');
+        let userObj: any = null;
         if (cookie) {
             try {
-                setUser(JSON.parse(cookie));
+                userObj = JSON.parse(cookie);
+                setUser(userObj);
             } catch {}
         } else {
             setUser(null);
         }
+        // Check if user has any reported item with status 'pending'
+        async function checkReported() {
+            if (userObj && userObj.id) {
+                const supabase = createClient();
+                const { data, error } = await supabase
+                    .from('items')
+                    .select('id')
+                    .eq('user_id', userObj.id)
+                    .eq('status', 'pending')
+                    .limit(1);
+                setHasReportedItem(!!(data && data.length > 0));
+            } else {
+                setHasReportedItem(false);
+            }
+        }
+        checkReported();
     }, []);
 
     useEffect(() => {

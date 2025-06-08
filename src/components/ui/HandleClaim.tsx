@@ -6,10 +6,11 @@ import { useToast } from './ToastProvider';
 import Cookies from 'js-cookie';
 import { getUserFromCookie, requireUserOrRedirect } from '../../utils/auth';
 
-export default function HandleClaim({ open, onClose, onSubmit }: {
+export default function HandleClaim({ open, onClose, onSubmit, claimItem }: {
     open: boolean;
     onClose: () => void;
     onSubmit?: (data: any) => void;
+    claimItem?: any;
 }) {
     const [reason, setReason] = useState('');
     const [characteristics, setCharacteristics] = useState('');
@@ -167,11 +168,58 @@ export default function HandleClaim({ open, onClose, onSubmit }: {
             return;
         }
         setSubmitting(true);
-        const data = { reason, characteristics, brand, name, studentNumber, phone, image, idImage };
-        if (onSubmit) onSubmit(data);
-        setSubmitting(false);
-        onClose();
-        showToast('Claim submitted!', 'success');
+        try {
+            // Get user info from cookie
+            const user = getUserFromCookie();
+            if (!user) {
+                showToast('You must be logged in to claim an item.', 'error');
+                setSubmitting(false);
+                return;
+            }
+            // Get the item being claimed from prop
+            const item = claimItem;
+            if (!item || !item.id) {
+                showToast('No item selected for claim.', 'error');
+                setSubmitting(false);
+                return;
+            }
+            // Upload images to Supabase Storage (bucket: 'claim-images')
+            const supabase = require('@/supabase/clients/client').createClient();
+            const proofFileName = `proof_${item.id}_${Date.now()}`;
+            const idFileName = `id_${item.id}_${Date.now()}`;
+            let proofImageUrl = '';
+            let idImageUrl = '';
+            // Upload proof image
+            const { data: proofUpload, error: proofError } = await supabase.storage.from('claim-images').upload(proofFileName, image);
+            if (proofError) throw new Error('Failed to upload proof image.');
+            proofImageUrl = supabase.storage.from('claim-images').getPublicUrl(proofFileName).publicUrl;
+            // Upload ID image
+            const { data: idUpload, error: idError } = await supabase.storage.from('claim-images').upload(idFileName, idImage);
+            if (idError) throw new Error('Failed to upload ID image.');
+            idImageUrl = supabase.storage.from('claim-images').getPublicUrl(idFileName).publicUrl;
+            // Insert into pending_claims
+            const { error: insertError } = await supabase.from('pending_claims').insert({
+                item_id: item.id,
+                claimer_id: user.id,
+                full_name: name,
+                contact_number: phone,
+                email: user.email || '',
+                proof_image_url: proofImageUrl,
+                student_id_image_url: idImageUrl,
+                legal_agreement: true,
+                status: 'pending',
+            });
+            if (insertError) throw new Error('Failed to submit claim.');
+            // Update item status to 'pending'
+            await supabase.from('items').update({ status: 'pending' }).eq('id', item.id);
+            showToast('Claim submitted!', 'success');
+            if (onSubmit) onSubmit({ itemId: item.id });
+            setSubmitting(false);
+            onClose();
+        } catch (err: any) {
+            showToast(err.message || 'Failed to submit claim.', 'error');
+            setSubmitting(false);
+        }
     }
 
     return (

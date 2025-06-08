@@ -26,6 +26,7 @@ export default function FoundItemPage() {
 	const { showToast } = useToast();
 	const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 	const [showScrollButton, setShowScrollButton] = useState(false);
+	const [showClaimsLink, setShowClaimsLink] = useState(false);
 
 	const sortOptions = [
 		{ value: "recent", label: "Most Recent" },
@@ -249,7 +250,7 @@ export default function FoundItemPage() {
 						aria-haspopup="dialog"
 						aria-expanded={open}
 					>
-						...See more
+						See more
 					</button>
 				)}
 				{portal}
@@ -316,6 +317,36 @@ export default function FoundItemPage() {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
+	useEffect(() => {
+		async function checkClaimsVisibility() {
+			const user = getUserFromCookie();
+			if (!user) {
+				setShowClaimsLink(false);
+				return;
+			}
+			const supabase = createClient();
+			// Fetch user role
+			const { data: userData } = await supabase
+				.from('users')
+				.select('role')
+				.eq('id', user.id)
+				.single();
+			const role = userData?.role;
+			if (role === 'admin' || role === 'staff') {
+				setShowClaimsLink(true);
+				return;
+			}
+			// Check if user has a pending reported item
+			const { data: pendingItems } = await supabase
+				.from('items')
+				.select('id')
+				.eq('user_id', user.id)
+				.eq('status', 'pending');
+			setShowClaimsLink(!!pendingItems && pendingItems.length > 0);
+		}
+		checkClaimsVisibility();
+	}, []);
+
 	return (
 		<div className="min-h-screen w-full flex flex-col">
 			{/* Fixed background image */}
@@ -338,14 +369,23 @@ export default function FoundItemPage() {
 						<div className="flex w-full justify-center gap-2 mt-4">
 							<Link
 								href="/lost-item"
-								className={`min-w-[110px] flex items-center justify-center gap-2 px-4 py-1.5 rounded-full font-extrabold transition border-2 shadow focus:outline-none focus:ring-2 focus:ring-green-400 text-sm ${pathname === "/lost-item" ? "bg-green-700 text-white border-green-700 pointer-events-none" : "bg-white text-green-700 border-green-700 hover:bg-green-50"}`}
+								className={`min-w-[110px] flex items-center justify-center gap-2 px-4 py-1.5 rounded-full font-semibold transition border-2 shadow focus:outline-none focus:ring-2 focus:ring-green-400 text-sm ${pathname === "/lost-item" ? "bg-green-700 text-white border-green-700 pointer-events-none" : "bg-white text-green-700 border-green-700 hover:bg-green-50"}`}
 								aria-current={pathname === "/lost-item" ? "page" : undefined}
 							>
 								Lost
 							</Link>
+							{showClaimsLink && (
+								<Link
+									href="/claims"
+									className={`min-w-[110px] flex items-center justify-center gap-2 px-4 py-1.5 rounded-full font-semibold transition border-2 shadow focus:outline-none focus:ring-2 focus:ring-green-400 text-sm ${pathname === "/claims" ? "bg-green-700 text-white border-green-700 pointer-events-none" : "bg-white text-green-700 border-green-700 hover:bg-green-50"}`}
+									aria-current={pathname === "/claims" ? "page" : undefined}
+								>
+									Claims
+								</Link>
+							)}
 							<Link
 								href="/found-item"
-								className={`min-w-[110px] flex items-center justify-center gap-2 px-4 py-1.5 rounded-full font-extrabold transition border-2 shadow focus:outline-none focus:ring-2 focus:ring-green-400 text-sm ${pathname === "/found-item" ? "bg-green-700 text-white border-green-700 pointer-events-none" : "bg-white text-green-700 border-green-700 hover:bg-green-50"}`}
+								className={`min-w-[110px] flex items-center justify-center gap-2 px-4 py-1.5 rounded-full font-semibold transition border-2 shadow focus:outline-none focus:ring-2 focus:ring-green-400 text-sm ${pathname === "/found-item" ? "bg-green-700 text-white border-green-700 pointer-events-none" : "bg-white text-green-700 border-green-700 hover:bg-green-50"}`}
 								aria-current={pathname === "/found-item" ? "page" : undefined}
 							>
 								Found
@@ -429,6 +469,15 @@ export default function FoundItemPage() {
 								>
 									Lost
 								</Link>
+								{showClaimsLink && (
+									<Link
+										href="/claims"
+										className={`min-w-[90px] flex items-center justify-center gap-2 px-4 py-1.5 rounded-full font-bold font-sans transition border-2 shadow focus:outline-none focus:ring-2 focus:ring-green-400 text-sm ${pathname === "/claims" ? "bg-green-700 text-white border-green-700 scale-105 pointer-events-none" : "bg-white text-green-700 border-green-700 hover:bg-green-50 hover:scale-105"}`}
+										aria-current={pathname === "/claims" ? "page" : undefined}
+									>
+										Claims
+									</Link>
+								)}
 								<Link
 									href="/found-item"
 									className={`min-w-[90px] flex items-center justify-center gap-2 px-4 py-1.5 rounded-full font-bold font-sans transition border-2 shadow focus:outline-none focus:ring-2 focus:ring-green-400 text-sm ${pathname === "/found-item" ? "bg-green-700 text-white border-green-700 scale-105 pointer-events-none" : "bg-white text-green-700 border-green-700 hover:bg-green-50 hover:scale-105"}`}
