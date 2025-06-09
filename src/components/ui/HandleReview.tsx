@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createClient } from '../../supabase/clients/client';
 import { useToast } from './ToastProvider';
+import { useRouter } from 'next/navigation';
 
 interface HandleReviewProps {
   open: boolean;
@@ -15,6 +16,7 @@ export default function HandleReview({ open, onClose, item, modalType, onStatusC
   const [reason, setReason] = useState('');
   const [notes, setNotes] = useState('');
   const { showToast } = useToast();
+  const router = useRouter();
 
   if (!open) return null;
 
@@ -38,6 +40,12 @@ export default function HandleReview({ open, onClose, item, modalType, onStatusC
       );
       if (onStatusChange) onStatusChange(status);
       onClose();
+      // Redirect after success
+      if (status === 'claimed') {
+        router.push('/found-item');
+      } else if (status === 'not_claimed') {
+        router.push('/lost-item');
+      }
     } else {
       showToast('Failed to update item status.', 'error');
     }

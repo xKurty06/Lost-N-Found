@@ -365,7 +365,7 @@ export default function RegisterPage() {
                 <div className="hidden md:block w-px bg-white/40 my-12 mx-2 rounded-full" />
                 {/* Right: Register Form */}
                 <div className="flex-1 flex flex-col justify-center items-center p-8 md:p-14">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-green-400 mb-2 text-center tracking-wider">REGISTER</h2>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-green-500 mb-2 text-center tracking-wider">REGISTER</h2>
                     <p className="text-white text-center text-base mb-6 font-semibold">Create your LF Hub account</p>
                     <RegisterForm agree={agree} setAgree={setAgree} openModal={openModal} />
                 </div>

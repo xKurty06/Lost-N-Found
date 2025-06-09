@@ -126,7 +126,7 @@ export default function LoginPage() {
         </div>
         <div className="hidden md:block w-px bg-white/40 my-12 mx-2 rounded-full" />
         <div className="flex-1 flex flex-col justify-center items-center p-8 md:p-14">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-green-400 mb-2 text-center tracking-wider">LOGIN</h2>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-green-500 mb-2 text-center tracking-wider">LOGIN</h2>
           <p className="text-white text-center text-base mb-6 font-semibold">Welcome to LF Hub</p>
           <LoginForm />
         </div>
