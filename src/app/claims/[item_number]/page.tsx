@@ -90,7 +90,13 @@ export default function ClaimDetailsPage(props: any) {
 
     useEffect(() => {
         const user = getUserFromCookie();
-        if (!user || (!['admin', 'staff'].includes(user.role) && (!item || user.id !== item.user_id))) {
+        if (!user) {
+            showToast('Access denied.', 'error');
+            router.replace('/lost-item');
+            return;
+        }
+        // Only check item.user_id after item is loaded
+        if (item && !['admin', 'staff'].includes(user.role) && user.id !== item.user_id) {
             showToast('Access denied.', 'error');
             router.replace('/lost-item');
         }

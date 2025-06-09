@@ -350,16 +350,14 @@ export default function RegisterPage() {
             <div className="w-full max-w-4xl flex flex-col md:flex-row items-stretch justify-center bg-white/10 rounded-3xl shadow-2xl backdrop-blur-md border border-white/30 overflow-hidden">
                 {/* Left: Logo */}
                 <div className="hidden md:flex flex-col items-center justify-center w-1/2 bg-transparent p-10">
-                    <Link href="/home" className="group">
-                        <Image
-                            src="/images/logo.png"
-                            alt="Lost & Found Hub Logo"
-                            width={160}
-                            height={160}
-                            className="h-64 w-64 object-contain rounded-full drop-shadow-xl transition-transform duration-200 group-hover:scale-110 cursor-pointer"
-                            priority
-                        />
-                    </Link>
+                    <Image
+                        src="/images/logo.png"
+                        alt="Lost & Found Hub Logo"
+                        width={160}
+                        height={160}
+                        className="h-64 w-64 object-contain rounded-full bg-white drop-shadow-xl transition-transform duration-200 group-hover:scale-110 cursor-pointer"
+                        priority
+                    />
                 </div>
                 {/* Vertical Divider */}
                 <div className="hidden md:block w-px bg-white/40 my-12 mx-2 rounded-full" />
