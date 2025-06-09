@@ -107,6 +107,10 @@ export default function LostItemPage() {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
+	const colorSwatchMap: Record<string, string> = {
+		Tan: '#D2B48C', Charcoal: '#36454F', Bronze: '#CD7F32', Copper: '#B87333', Amber: '#FFBF00', Burgundy: '#800020', Ivory: '#FFFFF0', Azure: '#007FFF', Emerald: '#50C878', Sapphire: '#0F52BA', Ruby: '#E0115F', Rose: '#FF007F', 'Sky Blue': '#87CEEB', Mustard: '#FFDB58', Plum: '#8E4585', Salmon: '#FA8072', Khaki: '#F0E68C', Denim: '#1560BD', Sand: '#C2B280', Chocolate: '#7B3F00', 'Forest Green': '#228B22', Slate: '#708090', Lilac: '#C8A2C8', Seafoam: '#93E9BE', Crimson: '#DC143C', Fuchsia: '#FF00FF', Aqua: '#00FFFF', Periwinkle: '#CCCCFF', Eggplant: '#614051', Mauve: '#E0B0FF', Chartreuse: '#7FFF00', Apricot: '#FBCEB1', Cerulean: '#007BA7', Taupe: '#483C32', Steel: '#4682B4', Blush: '#DE5D83', 'Mint Green': '#98FF98', Sunflower: '#FFDA03', Pumpkin: '#FF7518', Bubblegum: '#FFC1CC', 'Indigo Blue': '#3F00FF', 'Royal Blue': '#4169E1', Jade: '#00A86B', Onyx: '#353839', Pearl: '#EAE0C8', Rust: '#B7410E', Sienna: '#882D17', Topaz: '#FFC87C', Zaffre: '#0014A8', Amethyst: '#9966CC', Canary: '#FFFF99', Celeste: '#B2FFFF', Flamingo: '#FC8EAC', Honey: '#FFC30B', Jasmine: '#F8DE7E', Lemon: '#FFF700', Obsidian: '#0B0B0B', Opal: '#A8C3BC', Papaya: '#FFEFD5', Quartz: '#51484F', Raspberry: '#E30B5D', Scarlet: '#FF2400', Tangerine: '#F28500', Ultramarine: '#3F00FF', Vanilla: '#F3E5AB', Wisteria: '#C9A0DC', Xanadu: '#738678', 'Yale Blue': '#0F4D92', Zucchini: '#506022', Black: '#000', White: '#FFF', Gray: '#808080', Red: '#FF0000', Blue: '#0000FF', Green: '#008000', Yellow: '#FFFF00', Orange: '#FFA500', Purple: '#800080', Pink: '#FFC0CB', Brown: '#A52A2A', Beige: '#F5F5DC', Cyan: '#00FFFF', Magenta: '#FF00FF', Maroon: '#800000', Navy: '#000080', Olive: '#808000', Teal: '#008080', Lime: '#00FF00', Gold: '#FFD700', Silver: '#C0C0C0', Violet: '#8F00FF', Indigo: '#4B0082', Turquoise: '#40E0D0', Coral: '#FF7F50', Peach: '#FFE5B4', Mint: '#98FF98', Lavender: '#E6E6FA'
+	};
+
 	useEffect(() => {
 		async function checkClaimsVisibility() {
 			const user = getUserFromCookie();
@@ -626,8 +630,20 @@ export default function LostItemPage() {
 									</p>
 									<DescriptionWithPopover description={item.description} />
 									<p className="text-xs flex items-center gap-1">
-										<span className="inline-block w-3 h-3 rounded-full border border-green-700 mr-1" style={{ background: Array.isArray(item.color) ? (item.color[0]?.toLowerCase() || '') : (item.color?.toLowerCase() || '') }}></span>
-										<span className="text-green-700 font-semibold">Color:</span> {Array.isArray(item.color) ? item.color.join(', ') : item.color}
+										{Array.isArray(item.color) ? item.color.map((color: string, idx: number) => (
+											<span key={color + idx} className="flex items-center gap-1 mr-2">
+												<span className="inline-block w-3 h-3 rounded-full border border-green-700" style={{ background: colorSwatchMap[color] || color.toLowerCase() }} title={color}></span>
+												<span className="text-green-700 font-semibold">{color}</span>
+											</span>
+										)) : (
+											<span className="flex items-center gap-1">
+												<span className="inline-block w-3 h-3 rounded-full border border-green-700" style={{ background: colorSwatchMap[item.color] || (typeof item.color === 'string' ? item.color.toLowerCase() : undefined) }} title={item.color}></span>
+												<span className="text-green-700 font-semibold">Color:</span>
+												<span className="text-green-700 font-semibold">
+													{Array.isArray(item.color) ? item.color.join(', ') : item.color}
+												</span>
+											</span>
+										)}
 									</p>
 								</div>
 								<div className="flex w-full items-center mt-auto">

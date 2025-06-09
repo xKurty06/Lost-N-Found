@@ -289,16 +289,16 @@ export default function Page() {
                     </div>
                     <div className="text-green-900 text-base md:text-xl mt-10 leading-relaxed space-y-6 font-sans">
                         <p>
-                            At Lost and Found Hub, we believe that even the smallest acts of honesty and kindness can make a big difference. Founded with the goal of helping students at Cavite State University Main Campus recover misplaced or forgotten items, our platform serves as a central digital space where the campus community can come together to report lost belongings or turn in found ones.
+                            <span className="font-bold text-green-800">At Lost and Found Hub</span>, we believe that even the <span className="font-semibold text-green-700">smallest acts of honesty and kindness</span> can make a big difference. Founded with the goal of helping students at <span className="font-bold text-green-800">Cavite State University Main Campus</span> recover misplaced or forgotten items, our platform serves as a central digital space where the campus community can come together to <span className="font-semibold text-green-700">report lost belongings</span> or <span className="font-semibold text-green-700">turn in found ones</span>.
                         </p>
                         <p>
-                            We understand how frustrating it can be to lose something important – whether it’s your student ID, a cherished hoodie, a gadget, or even a single notebook filled with class notes. That’s why we’ve designed this hub to be easy to use, reliable, and student-centered.
+                            We understand how frustrating it can be to lose something important – whether it’s your <span className="font-bold">student ID</span>, a cherished hoodie, a gadget, or even a single notebook filled with class notes. That’s why we’ve designed this hub to be <span className="font-bold text-green-800">easy to use</span>, <span className="font-bold text-green-800">reliable</span>, and <span className="font-bold text-green-800">student-centered</span>.
                         </p>
                         <p>
-                            Our mission is to build a trustworthy system that not only helps recover personal items but also encourages a culture of responsibility, empathy, and cooperation among students. Every returned item is a small victory – and a reminder that we’re all in this together.
+                            Our mission is to build a <span className="font-bold text-green-800">trustworthy system</span> that not only helps recover personal items but also encourages a culture of <span className="font-semibold text-green-700">responsibility</span>, <span className="font-semibold text-green-700">empathy</span>, and <span className="font-semibold text-green-700">cooperation</span> among students. <span className="italic text-green-900">Every returned item is a small victory – and a reminder that we’re all in this together.</span>
                         </p>
                         <p>
-                            Whether you’re here because you’ve lost something or you want to do the right thing by reporting a found item, Lost and Found Hub is here to help.
+                            Whether you’re here because you’ve lost something or you want to do the right thing by reporting a found item, <br /><span className="font-bold text-green-800">Lost and Found Hub is here to help.</span>
                         </p>
                     </div>
                 </div>

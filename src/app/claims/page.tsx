@@ -59,6 +59,25 @@ export default function ClaimsPage() {
 		fetchItems();
 	}, []);
 
+	// Fetch pending claims for all items and mark items with hasPendingClaim
+	useEffect(() => {
+		async function fetchPendingClaims() {
+			if (!items.length) return;
+			const supabase = createClient();
+			const itemIds = items.map(item => item.id);
+			const { data: claims, error } = await supabase
+				.from('pending_claims')
+				.select('item_id')
+				.in('item_id', itemIds);
+			if (!error && claims) {
+				const claimedIds = new Set(claims.map(c => c.item_id));
+				setItems(prev => prev.map(item => ({ ...item, hasPendingClaim: claimedIds.has(item.id) })));
+			}
+		}
+		fetchPendingClaims();
+		// Only run when items change
+	}, [items.length]);
+
 	useEffect(() => {
 		if (!showSortOptions) return;
 		function handleClickOutside(e: MouseEvent) {
@@ -105,6 +124,8 @@ export default function ClaimsPage() {
 
 	const filteredItems = useMemo(() => {
 		let filtered = items.filter(item => {
+			// Only show items with available pending claims
+			if (!item.hasPendingClaim) return false;
 			const searchTerm = search.trim().toLowerCase();
 			if (!searchTerm) return true;
 			const inTitle = item.title?.toLowerCase().includes(searchTerm);
