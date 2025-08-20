@@ -238,7 +238,7 @@ export default function Page() {
                 </button>
             </div>
 
-            {/* Lost/Found Banner Section */}
+            {/* Lost/Found Banner */}
             <section id="getStarted" className="w-full border-b-[5px] border-b-cvsu-yellow" style={{ background: '#006f3d' }}>
                 <div ref={getStartedRef} className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-12 px-4 py-24 relative">
                     {/* LOST ITEM */}
